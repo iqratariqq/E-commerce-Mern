@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    if (process.env.MONGO_URL) {
+
+    if (!process.env.MONGO_URL) {
       console.error("mongo url error , maybe missing env");
-      throw new error("missing Mongo URL ");
+      throw new Error("missing Mongo URL ");
     }
     await mongoose.connect(process.env.MONGO_URL, {
       serverSelectionTimeoutMS: 10000,
@@ -13,7 +14,7 @@ const connectDB = async () => {
     });
     console.log("MongoDB connected");
   } catch (error) {
-    console.log("MongoDB connection failed");
+    console.log("MongoDB connection failed",error);
     process.exit(1);
   }
 };
