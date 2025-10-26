@@ -1,10 +1,10 @@
 import mongoose, { set } from "mongoose";
-import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLetter";
+import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLetter.js";
 
 const productSchema = new mongoose.Schema({
-  title: {
+  name: {
     type: String,
-    required: [true, "title is required"],
+    required: [true, "name is required"],
     trim: true,
     set: capitalizeFirstLetter,
   },
@@ -33,6 +33,10 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, "imageURL is required"],
   },
+  idFeatured:{
+    type:Boolean,
+    default:false,
+  }
 },{ timestamps: true });
 
 const Product=mongoose.model("Product", productSchema);

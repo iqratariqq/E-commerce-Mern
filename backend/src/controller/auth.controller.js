@@ -1,8 +1,10 @@
 import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import {
-  generateTokens,
-  setCookies,
+  generateAccessToken,
+  refreshTokenGenerate,
+  setAccessCookies,
+  setRefreshCookies,
   storeRefreshTokeninRedis,
 } from "../Utils/generateTokenandSetCookies.js";
 import jwt from "jsonwebtoken";
@@ -38,9 +40,11 @@ export const signup = async (req, res) => {
     });
     await user.save();
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { refreshToken } = refreshTokenGenerate(user._id);
+    const { accessToken } = generateAccessToken(user._id);
     await storeRefreshTokeninRedis(refreshToken);
-    setCookies(res, refreshToken, accessToken);
+    setRefreshCookies(res, refreshToken);
+    setAccessCookies(res, accessToken);
 
     res.status(201).json({
       success: true,
@@ -60,12 +64,46 @@ export const signup = async (req, res) => {
   }
 };
 
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-export const login = async (req, res) => {};
+  try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ succuss: false, message: "all fields are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ succuss: false, message: "invalid email" });
+    }
 
+    const userhashPassword = bcryptjs.compare(password, user.password);
+    if (!userhashPassword) {
+      {
+        return res
+          .status(400)
+          .json({ succuss: false, message: "invalid password" });
+      }
+    }
+    const refreshToken = refreshTokenGenerate(user._id);
+    const accessToken = generateAccessToken(user._id);
+    await storeRefreshTokeninRedis(user._id, refreshToken);
+    setRefreshCookies(res, refreshToken);
+    setAccessCookies(res, accessToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "login successfully",
+      user: {
+        ...user._doc,
+        password: undefined,
+      },
+    });
+  } catch (error) {}
+};
 
 export const logout = async (req, res) => {
-
   const refreshToken = req.cookies.refreshToken;
   try {
     if (!refreshToken) {
@@ -87,12 +125,52 @@ export const logout = async (req, res) => {
     res.status(200).json({ message: "logout successful" });
   } catch (error) {
     console.error("error in logout", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "internal server error",
-        error: error?.message,
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+      error: error?.message,
+    });
+  }
+};
+
+// basically it refresh the access token
+export const refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "no refresh token" });
+    }
+
+    const decode = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET_KEY
+    );
+ 
+    if (!decode || !decode.userID) {
+      return res
+        .status(401)
+        .json({ message: "unauthorized, invalid refresh token" });
+    }
+    const storedRefreshToken = await redis.get(`refreshToken:${decode.userID}`);
+    console.log("storedRefreshToken:", storedRefreshToken);
+    console.log("refreshToken:", refreshToken);
+    if (storedRefreshToken !== refreshToken) {
+      return res.status(401).json({
+        message:
+          "unauthorized, invalid refresh token,token not match with redis token",
       });
+    }
+
+    // generate new access token
+    const accessToken = generateAccessToken(decode.userID);
+    setAccessCookies(res, accessToken);
+    res.status(200).json({ message: "access token refreshed successfully" });
+  } catch (error) {
+    console.error("error in refreshing access token", error);
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+      error: error?.message,
+    });
   }
 };

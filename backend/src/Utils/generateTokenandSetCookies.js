@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "./redis.js";
 
-export const setCookies = (res, refreshToken,accessToken) => {
+export const setRefreshCookies = (res, refreshToken) => {
   try {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -10,20 +10,27 @@ export const setCookies = (res, refreshToken,accessToken) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-        res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 15 * 60 * 1000,
-    });
   } catch (error) {
     console.error("error in setting cookie for refresh token", error);
     throw new Error();
   }
 };
 
-export const generateTokens = (userID) => {
+export const setAccessCookies = (res, accessToken) => {
+  try {
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 15 * 60 * 1000,
+    });
+  } catch (error) {
+    console.error("error in setting cookie for accees token", error);
+    throw new Error();
+  }
+};
+
+export const generateAccessToken = (userID) => {
   try {
     const accessToken = jwt.sign(
       { userID },
@@ -33,6 +40,15 @@ export const generateTokens = (userID) => {
       }
     );
 
+    return accessToken;
+  } catch (error) {
+    console.error("error in generation  of access token", error);
+    throw new Error();
+  }
+};
+
+export const refreshTokenGenerate = (userID) => {
+  try {
     const refreshToken = jwt.sign(
       { userID },
       process.env.REFRESH_TOKEN_SECRET_KEY,
@@ -40,21 +56,23 @@ export const generateTokens = (userID) => {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRE || "7d",
       }
     );
-    return { accessToken, refreshToken };
+    return refreshToken;
   } catch (error) {
-    console.error("error in generation of token", error);
+    console.error("error in generation of refresh token", error);
     throw new Error();
   }
 };
 
-export const storeRefreshTokeninRedis=async(userID, refreshToken)=>{
+export const storeRefreshTokeninRedis = async (userID, refreshToken) => {
   try {
-await redis.set(`refreshToken:${userID}`, refreshToken, 'EX', 7 * 24 * 60 * 60);
-
-    
+    await redis.set(
+      `refreshToken:${userID}`,
+      refreshToken,
+      "EX",
+      7 * 24 * 60 * 60
+    );
   } catch (error) {
-        console.error("error in storing refresh token in redis", error);
+    console.error("error in storing refresh token in redis", error);
     throw new Error();
   }
-}
-
+};

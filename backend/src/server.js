@@ -2,6 +2,7 @@ import connectDB from "./config/mongo.connect.js";
 import express from "express";
 import "dotenv/config.js";
 import authRoutes from "./routes/auth.route.js";
+import productRoutes from "./routes/product.route.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -16,6 +17,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/auth",authRoutes)
+app.use("/api/products",productRoutes)
 
 
 connectDB().then(() => {
