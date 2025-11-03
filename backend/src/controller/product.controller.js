@@ -65,15 +65,80 @@ export const addProduct = async (req, res) => {
       description,
       category,
       quantity,
-      imageURL: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : " "
+      imageURL: cloudinaryResponse?.secure_url
+        ? cloudinaryResponse.secure_url
+        : " ",
     });
     await product.save();
     return res.status(201).json({ success: true, product });
-
   } catch (error) {
     console.error("error in addProduct controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, description, category, imageURL, quantity } = req.body;
+
+    const product = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        price,
+        description,
+        category,
+        imageURL,
+        quantity,
+      },
+      { new: true }
+    );
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: false, message: "product not found" });
+    }
     return res
-      .status(500)
-      .json({ success: false, message: "Internal server error", error: error.message });
+      .status(200)
+      .json({ success: true, message: "product updtae successfully" });
+  } catch (error) {
+    console.error("error in update product controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+
+    const product = await Product.findByIdAndDelete(id)
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: false, message: "product not found" });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "product delete successfully" });
+  } catch (error) {
+    console.error("error in delete product controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
