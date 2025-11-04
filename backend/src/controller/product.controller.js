@@ -157,3 +157,22 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+
+export const getCategoryProducts=async(req,res)=>{ 
+
+  try {
+    const {category}=req.params;
+    const categoryProducts=await Product.find({category});
+    if(categoryProducts.length===0){
+      return res.status(404).json({success:false,message:"No products found in this category"});
+    }
+    return res.status(200).json({success:true,categoryProducts});
+  } catch (error) {
+    console.error("error in getCategoryProducts controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
