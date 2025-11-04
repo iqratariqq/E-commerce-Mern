@@ -37,11 +37,12 @@ export const signup = async (req, res) => {
       userName,
       email,
       password: hashPassword,
+      role: req.body.role || "customer",
     });
     await user.save();
 
-    const { refreshToken } = refreshTokenGenerate(user._id);
-    const { accessToken } = generateAccessToken(user._id);
+    const refreshToken = refreshTokenGenerate(user._id);
+    const accessToken = generateAccessToken(user._id);
     await storeRefreshTokeninRedis(refreshToken);
     setRefreshCookies(res, refreshToken);
     setAccessCookies(res, accessToken);
@@ -152,8 +153,7 @@ export const refreshToken = async (req, res) => {
         .json({ message: "unauthorized, invalid refresh token" });
     }
     const storedRefreshToken = await redis.get(`refreshToken:${decode.userID}`);
-    console.log("storedRefreshToken:", storedRefreshToken);
-    console.log("refreshToken:", refreshToken);
+
     if (storedRefreshToken !== refreshToken) {
       return res.status(401).json({
         message:

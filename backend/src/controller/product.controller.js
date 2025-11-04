@@ -117,19 +117,34 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-
-    const product = await Product.findByIdAndDelete(id)
+    const product = await Product.findById(id);
 
     if (!product) {
       return res
         .status(404)
         .json({ message: false, message: "product not found" });
     }
+    if(product.imageURL){
+
+      try {
+        const productImageId=product.imageURL.split("/").pop().split(".")[0];
+        console.log("productImageId",productImageId);
+        await cloudinary.uploader.destroy(productImageId);
+      } catch (error) {
+        console.error("error in deleting product image from cloudinary", error);
+        return res.status(500).json({
+          success: false,
+          message: "Internal server error",
+          error: error.message,
+        });
+      }
+    }
+
+    await Product.findByIdAndDelete(id);
     return res
       .status(200)
       .json({ success: true, message: "product delete successfully" });

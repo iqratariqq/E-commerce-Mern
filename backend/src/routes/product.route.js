@@ -14,8 +14,8 @@ router.get("/", protectRoute, isAdmin, getProducts);
 //all users can access featured products
 router.get("/featured-products", getFeaturedProducts);
 
-router.post("/add-product", protectRoute, isAdmin, addProduct);
-router.put("/updtae-product", protectRoute, isAdmin, updateProduct);
-router.delete("/delete-rpoduct", protectRoute, isAdmin, deleteProduct);
+router.post("/", protectRoute, isAdmin, addProduct);
+router.patch("/:id", protectRoute, isAdmin, updateProduct);
+router.delete("/:id", protectRoute, isAdmin, deleteProduct);
 
 export default router;

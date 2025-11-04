@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, "imageURL is required"],
   },
-  idFeatured:{
+  isFeatured:{
     type:Boolean,
     default:false,
   }

@@ -21,6 +21,7 @@ export const protectRoute = async (req, res, next) => {
     const user = await User.findById(decode.userID).select(
       "-password -__v -createdAt -updatedAt"
     );
+ 
     if (!user) {
       return res
         .status(404)
