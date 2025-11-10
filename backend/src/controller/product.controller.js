@@ -86,7 +86,14 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, price, description, category, imageURL, quantity } = req.body;
 
-    const product = await Product.findByIdAndUpdate(
+    const product = await Product.findById(id);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: false, message: "product not found" });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
         name,
@@ -99,11 +106,6 @@ export const updateProduct = async (req, res) => {
       { new: true }
     );
 
-    if (!product) {
-      return res
-        .status(404)
-        .json({ message: false, message: "product not found" });
-    }
     return res
       .status(200)
       .json({ success: true, message: "product updtae successfully" });
@@ -128,11 +130,10 @@ export const deleteProduct = async (req, res) => {
         .status(404)
         .json({ message: false, message: "product not found" });
     }
-    if(product.imageURL){
-
+    if (product.imageURL) {
       try {
-        const productImageId=product.imageURL.split("/").pop().split(".")[0];
-        console.log("productImageId",productImageId);
+        const productImageId = product.imageURL.split("/").pop().split(".")[0];
+        console.log("productImageId", productImageId);
         await cloudinary.uploader.destroy(productImageId);
       } catch (error) {
         console.error("error in deleting product image from cloudinary", error);
@@ -158,15 +159,19 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-export const getCategoryProducts=async(req,res)=>{ 
-
+export const getCategoryProducts = async (req, res) => {
   try {
-    const {category}=req.params;
-    const categoryProducts=await Product.find({category});
-    if(categoryProducts.length===0){
-      return res.status(404).json({success:false,message:"No products found in this category"});
+    const { category } = req.params;
+    const categoryProducts = await Product.find({ category });
+    if (categoryProducts.length === 0) {
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "No products found in this category",
+        });
     }
-    return res.status(200).json({success:true,categoryProducts});
+    return res.status(200).json({ success: true, categoryProducts });
   } catch (error) {
     console.error("error in getCategoryProducts controller", error);
     return res.status(500).json({
@@ -175,4 +180,56 @@ export const getCategoryProducts=async(req,res)=>{
       error: error.message,
     });
   }
-}
+};
+
+export const getRecommendedProducts = async (req, res) => {
+  try {
+    const products = await Product.aggregate([
+      { $sample: { size: 3 } },
+      { $project: { _id: 1, name: 1, price: 1, imageURL: 1, category: 1 } },
+    ]);
+    if (products.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No recommended products found" });
+    }
+    return res.status(200).json({ success: true, products });
+  } catch (error) {
+    console.error("error in getRecommendedProducts controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const toggleFeaturedroduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const featuredProduct = await Product.findById(id);
+    if (featuredProduct) {
+      const updateFeaturedPro = await Product.create(
+        (featuredProduct.isFeatured = !featuredProduct.isFeatured)
+      );
+      await updateFeaturedPro.save();
+      await toggleFeaturedroductInRedis();
+    }
+  } catch (error) {
+    console.error("error in toggleFeaturedroduct controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const toggleFeaturedroductInRedis = async () => {
+  try {
+    const featuredProduct = await Product.find({ isFeatured: true }).lean();
+    await redis.set("featuredProducts", JSON.stringify(featuredProduct));
+  } catch (error) {
+    console.log("error in save toggleFeaturedroductInRedis", error);
+  }
+};
