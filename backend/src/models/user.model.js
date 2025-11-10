@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [6, "password must be at least 6 characters long"],
     },
-    addtoCart: [
+    cartItem: [
       {
         quantity: {
           type: Number,

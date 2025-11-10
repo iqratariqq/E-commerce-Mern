@@ -1,36 +1,107 @@
 import User from "../models/user.model";
 
-export const getCartItems=async(req,res)=>{
-    try {
-        const user=req.user;
-        const userProducts=await User.find(user._id).select("addtoCart")
-        if(userProducts.length===0)
-        {
-            return res.status(404).json({sucess:false,message:"no items found"})
-        }
-        return  res.status(200).json({sucess:false,userProducts})
-        
-    } catch (error) {
-        console.log("error in get cart item",error.message)
-     return res.status(500).json({sucess:false,message:"internal server error in getCartItems"})
-        
+export const getCartItems = async (req, res) => {
+  try {
+    const user = req.user;
+    const userProducts = await User.findById(user._id)
+      .select("cartItem cartItem.quantity")
+      .populate("cartItem.product");
+    if (userProducts.length === 0) {
+      return res.status(404).json({ sucess: false, message: "no items found" });
     }
+    return res.status(200).json({ sucess: true, userProducts });
+  } catch (error) {
+    console.log("error in get cart item", error.message);
+    return res.status(500).json({
+      sucess: false,
+      message: "internal server error in getCartItems",
+    });
+  }
+};
 
-}
+export const addtoCart = async (req, res) => {
+  try {
+    const { id: productId } = req.body;
+    const user = req.user;
 
-export const addtoCart=async(req,res)=>{
-    try {
-        const{id:productId}=req.body
-        const user=req.user;
-        
-
-        
-        
-    } catch (error) {
-        console.log("error in get cart item",error.message)
-     return res.status(500).json({sucess:false,message:"internal server error in addtoCart"})
-        
+    const existingItem = await user.cartItem.find(
+      (item) => item.product.toString() == productId
+    );
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      await user.cartItem.push({ product: productId });
     }
+    await user.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "item added successfully" });
+  } catch (error) {
+    console.log("error in get cart item", error.message);
+    return res
+      .status(500)
+      .json({ sucess: false, message: "internal server error in addtoCart" });
+  }
+};
 
-}
+export const removeAllItem = async (req, res) => {
+  try {
+    const productId = req.body;
+    const user = req.user;
+    const cartProduct = await user.cartItem.find(
+      (item) => item.product.toString() == productId
+    );
+    if (item) {
+      cartProduct.cartItem.filter(
+        (item) => item.product.toString() !== productId
+      );
+      await cartProduct.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "item delete successfully" });
+    }
+    return res
+      .status(404)
+      .json({ success: false, message: "item not found in your cart" });
+  } catch (error) {
+    console.log("error in get cart item", error.message);
+    return res.status(500).json({
+      sucess: false,
+      message: "internal server error in removeAllItem",
+    });
+  }
+};
 
+export const updateCart = async (res, req) => {
+  try {
+    const { id: productId } = req.params();
+    const quantity = req.body;
+    const user = req.user;
+    const cartItem = await user.cartItem.find(
+      (item) => item.product.toString === productId
+    );
+    if (cartItem) {
+      if (quantity === 0) {
+        await user.cartItem.filter(item.product.toString !== productId);
+        await user.save();
+        return res
+          .status(200)
+          .json({ success: true, message: "item update successfully" });
+      }
+      user.cartItem.quantity = quantity;
+      await user.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "item update successfully" });
+    }
+    return res
+      .status(404)
+      .json({ success: false, message: "item not found in your cart" });
+  } catch (error) {
+    console.log("error in get cart item", error.message);
+    return res.status(500).json({
+      sucess: false,
+      message: "internal server error in removeAllItem",
+    });
+  }
+};

@@ -164,12 +164,10 @@ export const getCategoryProducts = async (req, res) => {
     const { category } = req.params;
     const categoryProducts = await Product.find({ category });
     if (categoryProducts.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No products found in this category",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No products found in this category",
+      });
     }
     return res.status(200).json({ success: true, categoryProducts });
   } catch (error) {
@@ -209,9 +207,7 @@ export const toggleFeaturedroduct = async (req, res) => {
     const { id } = req.params;
     const featuredProduct = await Product.findById(id);
     if (featuredProduct) {
-      const updateFeaturedPro = await Product.create(
-        (featuredProduct.isFeatured = !featuredProduct.isFeatured)
-      );
+      featuredProduct.isFeatured = !featuredProduct.isFeatured;
       await updateFeaturedPro.save();
       await toggleFeaturedroductInRedis();
     }
