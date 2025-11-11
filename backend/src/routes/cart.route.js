@@ -1,8 +1,17 @@
-import express from "express"
-import router from "./product.route";
-import { protectRoute } from "../middelware/auth.middelware";
-import { getCartItems } from "../controller/cart.controller";
+import express from "express";
 
-const Route=express.Router();
+import { protectRoute } from "../middelware/auth.middelware.js";
+import {
+  addtoCart,
+  getCartItems,
+  removeAllItem,
+  updateCart,
+} from "../controller/cart.controller.js";
 
-router.get("/",protectRoute,getCartItems)
+const router = express.Router();
+
+router.get("/", protectRoute, getCartItems);
+router.post("/", protectRoute, addtoCart);
+router.patch("/", protectRoute, removeAllItem);
+router.patch("/:id", protectRoute, updateCart);
+export default router;

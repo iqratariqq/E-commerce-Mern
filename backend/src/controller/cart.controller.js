@@ -1,12 +1,13 @@
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 
 export const getCartItems = async (req, res) => {
   try {
     const user = req.user;
+   
     const userProducts = await User.findById(user._id)
-      .select("cartItem cartItem.quantity")
+      .select("cartItem")
       .populate("cartItem.product");
-    if (userProducts.length === 0) {
+    if (userProducts.cartItem.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });
     }
     return res.status(200).json({ sucess: true, userProducts });
@@ -21,6 +22,7 @@ export const getCartItems = async (req, res) => {
 
 export const addtoCart = async (req, res) => {
   try {
+
     const { id: productId } = req.body;
     const user = req.user;
 
@@ -72,13 +74,15 @@ export const removeAllItem = async (req, res) => {
   }
 };
 
-export const updateCart = async (res, req) => {
+export const updateCart = async (req, res) => {
   try {
-    const { id: productId } = req.params();
+  
+    const { id: productId } = req.params;
     const quantity = req.body;
     const user = req.user;
+  
     const cartItem = await user.cartItem.find(
-      (item) => item.product.toString === productId
+      (item) => item.product._id.toString === productId
     );
     if (cartItem) {
       if (quantity === 0) {
