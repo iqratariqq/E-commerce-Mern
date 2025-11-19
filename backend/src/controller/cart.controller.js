@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 export const getCartItems = async (req, res) => {
   try {
     const user = req.user;
-   
     const userProducts = await User.findById(user._id)
       .select("cartItem")
       .populate("cartItem.product");
@@ -22,7 +21,6 @@ export const getCartItems = async (req, res) => {
 
 export const addtoCart = async (req, res) => {
   try {
-
     const { id: productId } = req.body;
     const user = req.user;
 
@@ -48,16 +46,17 @@ export const addtoCart = async (req, res) => {
 
 export const removeAllItem = async (req, res) => {
   try {
-    const productId = req.body;
+    const { id: productId } = req.body;
     const user = req.user;
     const cartProduct = await user.cartItem.find(
       (item) => item.product.toString() == productId
     );
-    if (item) {
-      cartProduct.cartItem.filter(
+
+    if (cartProduct) {
+      user.cartItem = await user.cartItem.filter(
         (item) => item.product.toString() !== productId
       );
-      await cartProduct.save();
+      await user.save();
       return res
         .status(200)
         .json({ success: true, message: "item delete successfully" });
@@ -66,7 +65,7 @@ export const removeAllItem = async (req, res) => {
       .status(404)
       .json({ success: false, message: "item not found in your cart" });
   } catch (error) {
-    console.log("error in get cart item", error.message);
+    console.log("error in delete cart product", error.message);
     return res.status(500).json({
       sucess: false,
       message: "internal server error in removeAllItem",
@@ -76,23 +75,21 @@ export const removeAllItem = async (req, res) => {
 
 export const updateCart = async (req, res) => {
   try {
-  
     const { id: productId } = req.params;
-    const quantity = req.body;
+    const { quantity } = req.body;
     const user = req.user;
-  
+
     const cartItem = await user.cartItem.find(
-      (item) => item.product._id.toString === productId
+      (item) => item.product.toString() === productId
     );
     if (cartItem) {
       if (quantity === 0) {
-        await user.cartItem.filter(item.product.toString !== productId);
-        await user.save();
-        return res
-          .status(200)
-          .json({ success: true, message: "item update successfully" });
+        user.cartItem = await user.cartItem.filter(
+          (item) => item.product.toString() !== productId
+        );
+      } else {
+        cartItem.quantity = quantity;
       }
-      user.cartItem.quantity = quantity;
       await user.save();
       return res
         .status(200)
@@ -105,7 +102,7 @@ export const updateCart = async (req, res) => {
     console.log("error in get cart item", error.message);
     return res.status(500).json({
       sucess: false,
-      message: "internal server error in removeAllItem",
+      message: "internal server error in update cart",
     });
   }
 };
