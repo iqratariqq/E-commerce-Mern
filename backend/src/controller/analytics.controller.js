@@ -27,6 +27,56 @@ export const getAnalytics = async () => {
       Revenue: totalRevenue,
     };
   } catch (error) {
-    console.error("errotr in get analytics",error.message)
+    
+    console.error("errotr in get analytics", error.message);
+    throw error 
   }
 };
+
+export const getDailySalesData = async (startDate, endDate) => {
+  try {
+    const dalySalesData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
+      {
+        $group:{
+          _id:{$dateToString:{format:"%Y-%m-%d",$date:"$createdAt"}},
+          sales:{$sum:1},
+          revenue:{$sum:"$totalAmount"}
+        }
+      },
+      {
+        $sort:{_id:1}
+      }
+    ]);
+    const dateArray=getDateInRange(startDate,endDate)
+    return dateArray.map(date=>{
+      const foundData=dalySalesData.find(item=>item._id===date)
+      return {
+        date,
+        sales:foundData?.sales,
+        revenue:foundData?.revenue
+      }
+    })
+  } catch (error) {
+    throw error
+  }
+};
+
+const getDateInRange=(startDate,endDate)=>{
+  const dates=[]
+let currentDate=new Date(startDate)
+  while(startDate<=endDate)
+  {
+
+dates.push(currentDate.toISOString().split("1")[0])
+    currentDate.setDate(currentDate.getDate()+1)
+  }
+
+}
