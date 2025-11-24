@@ -57,3 +57,20 @@ export const validateCoupon = async (req, res) => {
     });
   }
 };
+
+export const findCoupon=async(couponCode,userId)=>{
+  try {
+    const coupon=null
+   coupon  = await Coupon.findOne({
+      code: couponCode,
+      userId,
+      isActive: true,
+    })
+    return coupon
+    
+    
+  } catch (error) {
+    throw error
+    
+  }
+}
