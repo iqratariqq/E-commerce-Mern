@@ -1,5 +1,7 @@
-import { stripe } from "../Utils/stripe";
-import { findCoupon } from "./coupon.controller";
+import Coupon from "../models/coupon.model.js";
+import Order from "../models/order.model.js";
+import { stripe } from "../Utils/stripe.js";
+import { findCoupon } from "./coupon.controller.js";
 
 export const createCheckoutSession = async (req, res) => {
   try {
@@ -34,32 +36,118 @@ export const createCheckoutSession = async (req, res) => {
       );
     }
 
-    const session=await stripe.checkout.sessions.create({
-        payment_method_types:["card",],
-        line_items:liteItems,
-        mode:"payment",
-        success_url:`${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url:`${process.env.CLIENT_URL}/purchase-cancel`,
-        discounts:coupon?[
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: liteItems,
+      mode: "payment",
+      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
+      discounts: coupon
+        ? [
             {
-                coupon:await createStripeCoupon(coupon.discountPercentage),
-            }
-        ]:[],
-        metadata:{
-            userId:req.user._id.toString(),
-            couponCode:couponCode||" "
-        }
-
-    })
-  } catch (error) {}
+              coupon: await createStripeCoupon(coupon.discountPercentage),
+            },
+          ]
+        : [],
+      metadata: {
+        userId: req.user._id.toString(),
+        couponCode: couponCode || " ",
+        products: JSON.stringify(
+          products.map((p) => ({
+            id: p._id,
+            quantity: p.quantity,
+            price: p.price,
+          }))
+        ),
+      },
+    });
+    if (totalAmmount >= 20000) {
+      await createNewCoupon(req.user._id);
+    }
+    res
+      .status(200)
+      .json({ sucess: true, id: session.id, totalAmmount: totalAmmount / 100 });
+  } catch (error) {
+    console.error("error in createchechout session controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 
-const createStripeCoupon=async(discountPercentage)=>{
-    const coupon=await stripe.coupons.create({
-        percent_off:discountPercentage,
-        duration:"once"
-    })
-    return coupon.id
-    
+const createStripeCoupon = async (discountPercentage) => {
+  const coupon = await stripe.coupons.create({
+    percent_off: discountPercentage,
+    duration: "once",
+  });
+  return coupon.id;
+};
 
-}
+export const createNewCoupon = async (userId) => {
+  try {
+    const newCoupon = new Coupon({
+      code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+      discountPercentage: 10,
+      user: userId,
+      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //30 days
+    });
+    await newCoupon.save();
+    return newCoupon;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const checkoutSuccess = async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === "paid") {
+      await Coupon.findOneAndUpdate(
+        {
+          code: session.metadata.couponCode,
+          userId: session.metadata.userId,
+        },
+        {
+          isActive: false,
+        }
+      );
+
+      const products = JSON.parse(session.metadata.products);
+
+      //save new order in db
+      const newOrder = new Order({
+        user: session.metadata.userId,
+        products: products.map((p) => ({
+          products: p.id,
+          quantity: p.quantity,
+          price: p.price,
+        })),
+        totalAmount: session.amount_total/100,
+        stripSessionId: sessionId,
+      });
+
+      await newOrder.save();
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "order placed successfully",
+          orderId: newOrder._id,
+        });
+    } else {
+      res
+        .status(400)
+        .json({ success: true, message: "payment not paid successfully" });
+    }
+  } catch (error) {
+    console.error("error in ceckout success controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};

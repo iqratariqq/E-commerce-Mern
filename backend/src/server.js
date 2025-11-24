@@ -6,6 +6,7 @@ import productRoutes from "./routes/product.route.js";
 import cartRoutes from "./routes/cart.route.js";
 import couponRoutes from "./routes/coupon.route.js";
 import analyticsRoutes from "./routes/analytics.routes.js"
+import payementRoutes from "./routes/payment.route.js"
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -23,6 +24,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("api/coupon", couponRoutes);
 app.use("/api/analytics",analyticsRoutes)
+app.use("/api/payment",payementRoutes)
 
 connectDB().then(() => {
   app.listen(port, () => {
