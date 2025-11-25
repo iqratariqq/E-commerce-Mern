@@ -47,3 +47,16 @@ export const isAdmin = (req, res, next) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
+
+export const isCustomer = (req, res, next) => {
+    try {
+        if (req.user?.role === "customer" ) {
+            return next();
+        }
+        return res.status(403).json({ success: false, message: "Forbidden: Customers only" });
+    } catch (error) {
+        console.error("error in isCustomer middleware", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}

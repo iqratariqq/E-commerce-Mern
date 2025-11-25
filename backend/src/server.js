@@ -25,6 +25,7 @@ app.use("/api/cart", cartRoutes);
 app.use("api/coupon", couponRoutes);
 app.use("/api/analytics",analyticsRoutes)
 app.use("/api/payment",payementRoutes)
+app.use("/api/reviews",reviewRoutes)
 
 connectDB().then(() => {
   app.listen(port, () => {
