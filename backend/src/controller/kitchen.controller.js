@@ -1,0 +1,115 @@
+import Kitchen from "../models/kitchen.model.js";
+import Review from "../models/review.model.js";
+
+export const getAllKitchen = async (req, res) => {
+  try {
+    const kitchen = await Kitchen.find({}).populate(
+      "kitchenOwner reviews",
+      "userName location rating comment"
+    );
+    if (!kitchen) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+    return res.status(200).json({ success: true, kitchen });
+  } catch (error) {
+    console.log("error in get kitchen", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const getKitchenProductsById = async (req, res) => {
+  try {
+    const { id: kitchenId } = req.params;
+    const kitchen = await Kitchen.findById(kitchenId).populate("menuItems");
+    if (!kitchen) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+    return res.status(200).json({ success: true, kitchen });
+  } catch (error) {
+    console.log("error in get kitchen products by id", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteKitchenById = async (req, res) => {
+  try {
+    const { id: kitchenId } = req.params;
+    const kitchen = await Kitchen.findByIdAndDelete(kitchenId);
+    if (!kitchen) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+  } catch (error) {
+    console.log("error in delete kitchen by id", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateKitchenStatus = async (req, res) => {
+    try {
+        const {id:kitchenId}=req.params
+        const {status}=req.body
+        const validStatus=["open","close","busy"]       
+        if(!validStatus.includes(status)){
+            return res.status(400).json({success:false,message:"invalid status value"})
+        }
+        const kitchen = await Kitchen.findByIdAndUpdate(
+            kitchenId,
+            { status },
+            { new: true }
+        );
+        if (!kitchen) {
+            return res.status(404).json({ success: false, message: "kitchen not found" });
+        }
+        return res.status(200).json({ success: true, kitchen });
+    } catch (error) {
+        console.log("error in update kitchen status", error.message);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const getFeaturedKitchens = async (req, res) => {
+  try {
+    // Step 1: get kitchens that are open
+    const openKitchens = await Kitchen.find({ status: "open" }).lean();
+
+    // Step 2: calculate rating for each kitchen
+    const featured = [];
+
+    for (let kitchen of openKitchens) {
+      // fetch all reviews
+      const reviews = await Review.find({ _id: { $in: kitchen.reviews } });
+
+      if (reviews.length === 0) continue;
+
+      // calculate avg rating
+      const avgRating =
+        reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+
+      // criteria: good reviews + high rating
+      if (avgRating >= 4 && reviews.length >= 2) {
+        featured.push({
+          ...kitchen,
+          avgRating,
+          reviewsCount: reviews.length,
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      featuredKitchens: featured,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};

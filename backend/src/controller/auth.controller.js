@@ -74,7 +74,7 @@ export const signup = async (req, res) => {
 
 export const registerKitchen=async(req,res)=>{
   try {
-    const{name:kitchenName,address:kitchenAddress,kitchenImageURL}=req.body
+    const{name:kitchenName,address:kitchenAddress,kitchenImageURL,cetagory}=req.body
     const kitchenOwner=req.user._id
     const owner=await User.findById(kitchenOwner)
     if(!owner || owner.role!=="vendor" ){
@@ -90,6 +90,7 @@ export const registerKitchen=async(req,res)=>{
       kitchenName,
       kitchenOwner, 
       kitchenAddress,
+      cetagory,
       kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " "
     });
     await newKitchen.save();

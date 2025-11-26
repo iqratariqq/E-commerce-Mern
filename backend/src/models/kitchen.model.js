@@ -1,48 +1,77 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLetter.js";
 
 const kitchenSchema = new mongoose.Schema(
   {
-    kitchenName:{
-        type: String,
-        required: true,
-        unique: true,
-        set:capitalizeFirstLetter
+    kitchenName: {
+      type: String,
+      required: true,
+      unique: true,
+      set: capitalizeFirstLetter
     },
-    kitchenOwner:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
-    address:{
-        type: String,
-        required: true,
-    },
-    reviews:{
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "Review",
-        default:[]
 
+    kitchenOwner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    kitchenImageURL:{
-        type: String,
-        default:""
-    },
-   //todo: video field 
 
-    status:{
-        type: String,
-        enum:["close","open","busy"],
-        default:"close"
+    address: {
+      type: String,
+      required: true,
     },
-    menuItems:{
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "Product",
-        default:[]
+
+    reviews: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+      default: []
+    }],
+
+    kitchenImageURL: {
+      type: String,
+      default: ""
+    },
+
+    category: {
+      type: String,
+      enum: ["vegetarian","non-vegetarian","vegan","continental","chinese","italian","fast-food","desserts","bakery","desi"],
+      default: "continental"
+    },
+
+    status: {
+      type: String,
+      enum: ["close","open","busy"],
+      default: "close"
+    },
+
+    menuItems: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      default: []
+    }],
+
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point"
+      },
+      coordinates: {
+        type: [Number], // [lng, lat]
+        required: true
+      }
+    },
+
+    avgRating: {
+      type: Number,
+      default: 0
     }
 
   },
   { timestamps: true }
 );
-const Kitchen=new mongoose.Model("Kitchen",kitchenSchema)
-export default Kitchen
+
+// 2dsphere index for geo queries
+kitchenSchema.index({ location: "2dsphere" });
+
+export default mongoose.model("Kitchen", kitchenSchema);
