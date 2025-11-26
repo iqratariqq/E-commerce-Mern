@@ -1,16 +1,29 @@
 import Product from "../models/product.model.js";
 import { redis } from "../Utils/redis.js";
 import cloudinary from "../Utils/cloudniray.js";
+import kitchen from "../models/kitchen.model.js";
+import Kitchen from "../models/kitchen.model.js";
 
-export const getProducts = async (req, res) => {
+export const getKitchenProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
-    if (products.length === 0) {
+    const { kitchenId } = req.params;
+    if (!kitchenId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "kitchenId is required" });
+    }
+
+    const kitchenProducts = await kitchen
+      .findById(kitchenId)
+      .populate("menuItems");
+    if (!kitchenProducts || kitchenProducts.menuItems.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "No products found" });
     }
-    return res.status(200).json({ success: true, products });
+    return res
+      .status(200)
+      .json({ success: true, products: kitchenProducts.menuItems });
   } catch (error) {
     console.error("error in getProducts controller", error);
     return res
@@ -51,8 +64,16 @@ export const getFeaturedProducts = async (req, res) => {
 };
 
 export const addProduct = async (req, res) => {
+  const kitchenId = req.params.kitchenId;
   const { name, price, description, category, imageURL, quantity } = req.body;
   try {
+    const kitchenExists = await kitchen.findById(kitchenId);
+    if (!kitchenExists) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+
     let cloudinaryResponse = null;
     if (imageURL) {
       cloudinaryResponse = await cloudinary.uploader.upload(imageURL, {
@@ -70,7 +91,11 @@ export const addProduct = async (req, res) => {
         : " ",
     });
     await product.save();
-    return res.status(201).json({ success: true, product });
+    kitchenExists.menuItems.push(product._id);
+    await kitchenExists.save();
+    return res
+      .status(201)
+      .json({ success: true, product, kitchen: kitchenExists });
   } catch (error) {
     console.error("error in addProduct controller", error);
     return res.status(500).json({
@@ -84,14 +109,34 @@ export const addProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, category, imageURL, quantity } = req.body;
-
+    const { name, price, description, imageURL, available } = req.body;
+    let cloudinaryResponse = null;
     const product = await Product.findById(id);
     if (!product) {
       return res
         .status(404)
-        .json({ message: false, message: "product not found" });
+        .json({ success: false, message: "product not found" });
     }
+
+    try {
+      const productImageId = product.imageURL.split("/").pop().split(".")[0];
+      console.log("productImageId", productImageId);
+      await cloudinary.uploader.destroy(productImageId);
+    } catch (error) {
+      console.error(
+        "error in deleting old product image from cloudinary",
+        error
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+
+    cloudinaryResponse = await cloudinary.uploader.upload(imageURL, {
+      folder: "products",
+    });
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
@@ -99,9 +144,10 @@ export const updateProduct = async (req, res) => {
         name,
         price,
         description,
-        category,
-        imageURL,
-        quantity,
+        available,
+        imageURL: cloudinaryResponse?.secure_url
+          ? cloudinaryResponse.secure_url
+          : " ",
       },
       { new: true }
     );
@@ -121,6 +167,7 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
+    const kitchenId = req.params.kitchenId;
     const { id } = req.params;
 
     const product = await Product.findById(id);
@@ -146,6 +193,12 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(id);
+
+    await Kitchen.findByIdAndUpdate(
+      kitchenId,
+      { $pull: { menuItems: id } },
+      { new: true }
+    );
     return res
       .status(200)
       .json({ success: true, message: "product delete successfully" });

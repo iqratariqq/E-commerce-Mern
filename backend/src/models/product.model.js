@@ -18,16 +18,9 @@ const productSchema = new mongoose.Schema({
     required: [true, "price is required"],
     min: [0, "price cannot be negative"],
   },
-  quantity: {
-    type: Number,
-    required: [true, "quantity is required"],
-    min: [0, "quantity cannot be negative"],
-  },
-  category: {
-    type: String,
-    required: [true, "category is required"],
-    trim: true,
-    set: capitalizeFirstLetter,
+  available:{
+    type:Boolean,
+    default:true,
   },
   imageURL: {
     type: String,

@@ -12,6 +12,7 @@ export const getAllKitchen = async (req, res) => {
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
+    
     return res.status(200).json({ success: true, kitchen });
   } catch (error) {
     console.log("error in get kitchen", error.message);
@@ -27,6 +28,7 @@ export const getKitchenProductsById = async (req, res) => {
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
+
     return res.status(200).json({ success: true, kitchen });
   } catch (error) {
     console.log("error in get kitchen products by id", error.message);

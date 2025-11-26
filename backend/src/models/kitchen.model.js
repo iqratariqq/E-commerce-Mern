@@ -74,4 +74,6 @@ const kitchenSchema = new mongoose.Schema(
 // 2dsphere index for geo queries
 kitchenSchema.index({ location: "2dsphere" });
 
-export default mongoose.model("Kitchen", kitchenSchema);
+const Kitchen = mongoose.model("Kitchen", kitchenSchema);
+
+export default Kitchen;
