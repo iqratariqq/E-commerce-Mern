@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import Kitchen from "../models/kitchen.model.js";
 import bcryptjs from "bcryptjs";
 import {
   generateAccessToken,
@@ -10,7 +11,7 @@ import {
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "../Utils/redis.js";
-import Kitchen from "../models/kitchen.model.js";
+import cloudinary from "../Utils/cloudniray.js";
 
 // register controller
 
@@ -34,7 +35,7 @@ export const signup = async (req, res) => {
         .status(409)
         .json({ success: false, message: "user already exist,try another email" });
     }
-    const hashPassword = await bcryptjs.hash(password, 6);
+    const hashPassword = await bcryptjs.hash(password, 10);
     const user = new User({
       userName,
       email,
@@ -73,16 +74,23 @@ export const signup = async (req, res) => {
 
 export const registerKitchen=async(req,res)=>{
   try {
-    const{name:kitchenName,address:kitchenAddress}=req.body
+    const{name:kitchenName,address:kitchenAddress,kitchenImageURL}=req.body
     const kitchenOwner=req.user._id
     const owner=await User.findById(kitchenOwner)
     if(!owner || owner.role!=="vendor" ){
       return res.status(403).json({success:false,message:"only vendor can register kitchen"})
     }
+    let cloudinaryResponse=null
+    if(kitchenImageURL){
+      cloudinaryResponse=await cloudinary.uploader.upload(kitchenImageURL,{
+        folder:"kitchen"
+      })
+    }
     const newKitchen=new Kitchen({
       kitchenName,
       kitchenOwner, 
-      kitchenAddress
+      kitchenAddress,
+      kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " "
     });
     await newKitchen.save();
     res.status(201).json({success:true,message:"kitchen registered successfully",kitchen:newKitchen})
@@ -106,7 +114,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ succuss: false, message: "invalid email" });
     }
 
-    const userhashPassword = bcryptjs.compare(password, user.password);
+    const userhashPassword =await bcryptjs.compare(password, user.password);
     if (!userhashPassword) {
       {
         return res
@@ -115,7 +123,7 @@ export const login = async (req, res) => {
       }
     }
     if(user.status!=="active"){
-      return res.status(403).json({success:false,message:"your account is inactive, please contact to admin"})
+      return res.status(403).json({success:false,message:"your account is not active, please contact to admin"})
     }
 
     const refreshToken = refreshTokenGenerate(user._id);
@@ -205,3 +213,4 @@ export const refreshToken = async (req, res) => {
     });
   }
 };
+

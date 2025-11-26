@@ -24,7 +24,7 @@ const kitchenSchema = new mongoose.Schema(
         default:[]
 
     },
-    imageUrl:{
+    kitchenImageURL:{
         type: String,
         default:""
     },
