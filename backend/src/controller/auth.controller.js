@@ -10,13 +10,15 @@ import {
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "../Utils/redis.js";
+import Kitchen from "../models/kitchen.model.js";
 
 // register controller
 
 export const signup = async (req, res) => {
-  const { userName, email, password } = req.body;
+  const{role}=req.params
+  const { userName, email, password,phoneNumber } = req.body;
   try {
-    if (!userName || !email || !password) {
+    if (!userName || !email || !password || !phoneNumber) {
       return res.status(400).json({ message: "all fields are required" });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,14 +32,18 @@ export const signup = async (req, res) => {
     if (alreadyExit) {
       return res
         .status(409)
-        .json({ success: false, message: "user already exist" });
+        .json({ success: false, message: "user already exist,try another email" });
     }
     const hashPassword = await bcryptjs.hash(password, 6);
     const user = new User({
       userName,
       email,
+      address,
       password: hashPassword,
-      role: req.body.role || "customer",
+      phoneNumber,
+      role:role === "vendor" ? "vendor" : "customer",
+      status: role === "vendor" ? "pending" : "active",
+
     });
     await user.save();
 
@@ -65,6 +71,27 @@ export const signup = async (req, res) => {
   }
 };
 
+export const registerKitchen=async(req,res)=>{
+  try {
+    const{name:kitchenName,address:kitchenAddress}=req.body
+    const kitchenOwner=req.user._id
+    const owner=await User.findById(kitchenOwner)
+    if(!owner || owner.role!=="vendor" ){
+      return res.status(403).json({success:false,message:"only vendor can register kitchen"})
+    }
+    const newKitchen=new Kitchen({
+      kitchenName,
+      kitchenOwner, 
+      kitchenAddress
+    });
+    await newKitchen.save();
+    res.status(201).json({success:true,message:"kitchen registered successfully",kitchen:newKitchen})
+  } catch (error) {
+    console.error("error in registering kitchen",error);
+    res.status(500).json({success:false,message:"internal server error",error:error?.message})
+    
+  }
+}
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -87,6 +114,10 @@ export const login = async (req, res) => {
           .json({ succuss: false, message: "invalid password" });
       }
     }
+    if(user.status!=="active"){
+      return res.status(403).json({success:false,message:"your account is inactive, please contact to admin"})
+    }
+
     const refreshToken = refreshTokenGenerate(user._id);
     const accessToken = generateAccessToken(user._id);
     await storeRefreshTokeninRedis(user._id, refreshToken);

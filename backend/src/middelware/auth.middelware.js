@@ -36,6 +36,18 @@ export const protectRoute = async (req, res, next) => {
 };
 
 //checking for admin role
+export const isVendor = (req, res, next) => {
+    try {
+        if (req.user?.role === "vendor" ) {
+            return next();
+        }
+        return res.status(403).json({ success: false, message: "Forbidden: Vendors only" });
+    } catch (error) {
+        console.error("error in isVendor middleware", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
 export const isAdmin = (req, res, next) => {
     try {
         if (req.user?.role === "admin" ) {

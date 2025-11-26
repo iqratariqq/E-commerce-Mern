@@ -1,5 +1,5 @@
 import express from "express";
-import { isAdmin, protectRoute } from "../middelware/auth.middelware.js";
+import {  isVender, protectRoute } from "../middelware/auth.middelware.js";
 import {
   addProduct,
   deleteProduct,
@@ -20,10 +20,9 @@ router.get("/category-products/:category", getCategoryProducts);
 router.get("/recommended-products", getRecommendedProducts);
 
 
-router.post("/", protectRoute, isAdmin, addProduct);
-router.put("/:id", protectRoute, isAdmin, updateProduct);
-router.patch("/:id", protectRoute, isAdmin,toggleFeaturedroduct);
-router.delete("/:id", protectRoute, isAdmin, deleteProduct);
-
+router.post("/", protectRoute, isVendor, addProduct);
+router.put("/:id", protectRoute, isVendor, updateProduct);
+router.patch("/:id", protectRoute, isVendor,toggleFeaturedroduct);
+router.delete("/:id", protectRoute, isVendor, deleteProduct);
 
 export default router;

@@ -22,6 +22,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [6, "password must be at least 6 characters long"],
     },
+    phoneNumber: {
+      type: String,
+      required: false,
+      trim: true,
+      required: [true, "phone number is required"],
+    },
+    status: {
+      type: String,
+      enum: ["active", "pending", "inactive"],
+      default: "active",
+    },
+
     cartItem: [
       {
         quantity: {
@@ -34,18 +46,23 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    role:{
-      type:String,
-      enum:["customer","admin"],
-      default:"customer"
+    role: {
+      type: String,
+      enum: ["customer", "vendor", "admin"],
+      default: "customer",
     },
-    address:{
-      type:String,
-      default:""
-    }
+    address: {
+      type: String,
+      default: "",
+    },
+    location: {
+      // for delivery time calculation
+      type: { type: String, default: "Point" },
+      coordinates: [Number],
+    },
   },
   { timestamps: true }
 );
 
-const User=mongoose.model("User",userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

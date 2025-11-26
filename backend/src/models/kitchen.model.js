@@ -9,7 +9,7 @@ const kitchenSchema = new mongoose.Schema(
         unique: true,
         set:capitalizeFirstLetter
     },
-    kitchenOwener:{
+    kitchenOwner:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
@@ -24,6 +24,12 @@ const kitchenSchema = new mongoose.Schema(
         default:[]
 
     },
+    imageUrl:{
+        type: String,
+        default:""
+    },
+   //todo: video field 
+
     status:{
         type: String,
         enum:["close","open","busy"],
