@@ -38,7 +38,7 @@ export const protectRoute = async (req, res, next) => {
 //checking for admin role
 export const isVendor = (req, res, next) => {
     try {
-        if (req.user?.role === "vendor" ) {
+        if (req.user?.role === "vendor" && req.user?.requestStatus==="active" ) {
             return next();
         }
         return res.status(403).json({ success: false, message: "Forbidden: Vendors only" });

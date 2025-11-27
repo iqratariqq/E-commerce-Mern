@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       required: [true, "phone number is required"],
     },
-    status: {
+    requestStatus: {
       type: String,
       enum: ["active", "pending", "inactive"],
       default: "active",

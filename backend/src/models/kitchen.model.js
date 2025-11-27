@@ -16,7 +16,7 @@ const kitchenSchema = new mongoose.Schema(
       required: true,
     },
 
-    address: {
+    kitchenAddress: {
       type: String,
       required: true,
     },

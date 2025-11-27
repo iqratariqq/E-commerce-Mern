@@ -11,7 +11,7 @@ import {
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "../Utils/redis.js";
-import cloudinary from "../Utils/cloudniray.js";
+import  { uploadImage } from "../Utils/cloudniray.js";
 
 // register controller
 
@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
       password: hashPassword,
       phoneNumber,
       role:role === "vendor" ? "vendor" : "customer",
-      status: role === "vendor" ? "pending" : "active",
+      requestStatus: role === "vendor" ? "pending" : "active",
 
     });
     await user.save();
@@ -75,17 +75,14 @@ export const signup = async (req, res) => {
 export const registerKitchen=async(req,res)=>{
   try {
     const{name:kitchenName,address:kitchenAddress,kitchenImageURL,cetagory}=req.body
+   
     const kitchenOwner=req.user._id
     const owner=await User.findById(kitchenOwner)
     if(!owner || owner.role!=="vendor" ){
       return res.status(403).json({success:false,message:"only vendor can register kitchen"})
     }
-    let cloudinaryResponse=null
-    if(kitchenImageURL){
-      cloudinaryResponse=await cloudinary.uploader.upload(kitchenImageURL,{
-        folder:"kitchen"
-      })
-    }
+    const cloudinaryResponse = await uploadImage(req.file.path,'kitchenImages')
+
     const newKitchen=new Kitchen({
       kitchenName,
       kitchenOwner, 
@@ -101,6 +98,7 @@ export const registerKitchen=async(req,res)=>{
     
   }
 }
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 

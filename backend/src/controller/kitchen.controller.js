@@ -12,26 +12,10 @@ export const getAllKitchen = async (req, res) => {
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
-    
-    return res.status(200).json({ success: true, kitchen });
-  } catch (error) {
-    console.log("error in get kitchen", error.message);
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-export const getKitchenProductsById = async (req, res) => {
-  try {
-    const { id: kitchenId } = req.params;
-    const kitchen = await Kitchen.findById(kitchenId).populate("menuItems");
-    if (!kitchen) {
-      return res
-        .status(404)
-        .json({ success: false, message: "kitchen not found" });
-    }
 
     return res.status(200).json({ success: true, kitchen });
   } catch (error) {
-    console.log("error in get kitchen products by id", error.message);
+    console.log("error in get kitchen", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -39,12 +23,26 @@ export const getKitchenProductsById = async (req, res) => {
 export const deleteKitchenById = async (req, res) => {
   try {
     const { id: kitchenId } = req.params;
-    const kitchen = await Kitchen.findByIdAndDelete(kitchenId);
-    if (!kitchen) {
+    const existingKitchen = await Kitchen.findById(kitchenId);
+    if (!existingKitchen) {
       return res
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
+    const kitchenImageId = existingKitchen.kitchenImageURL
+      .split("/")
+      .pop()
+      .split(".")[0];
+    console.log("kitchenImageId", kitchenImageId);
+    await cloudinary.uploader.destroy(kitchenImageId);
+
+    const kitchen = await Kitchen.findByIdAndDelete(kitchenId);
+
+    return res.status(200).json({
+      success: true,
+      message: "kitchen deleted successfully",
+      kitchen,
+    });
   } catch (error) {
     console.log("error in delete kitchen by id", error.message);
     return res.status(500).json({ success: false, message: error.message });
@@ -52,27 +50,87 @@ export const deleteKitchenById = async (req, res) => {
 };
 
 export const updateKitchenStatus = async (req, res) => {
-    try {
-        const {id:kitchenId}=req.params
-        const {status}=req.body
-        const validStatus=["open","close","busy"]       
-        if(!validStatus.includes(status)){
-            return res.status(400).json({success:false,message:"invalid status value"})
-        }
-        const kitchen = await Kitchen.findByIdAndUpdate(
-            kitchenId,
-            { status },
-            { new: true }
-        );
-        if (!kitchen) {
-            return res.status(404).json({ success: false, message: "kitchen not found" });
-        }
-        return res.status(200).json({ success: true, kitchen });
-    } catch (error) {
-        console.log("error in update kitchen status", error.message);
-        return res.status(500).json({ success: false, message: error.message });
+  try {
+    const { id: kitchenId } = req.params;
+    const { status } = req.body;
+    const validStatus = ["open", "close", "busy"];
+    if (!validStatus.includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid status value" });
     }
-}
+    const kitchen = await Kitchen.findByIdAndUpdate(
+      kitchenId,
+      { status },
+      { new: true }
+    );
+    if (!kitchen) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+    return res.status(200).json({ success: true, kitchen });
+  } catch (error) {
+    console.log("error in update kitchen status", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateKitchen = async (req, res) => {
+  try {
+    const { id: kitchenId } = req.params;
+    const { status, kitchenName, kitchenAddress, category } = req.body;
+
+    const existingKitchen = await Kitchen.findById(kitchenId);
+    if (!existingKitchen) {
+      return res
+        .status(404)
+        .json({ success: false, message: "kitchen not found" });
+    }
+    //if image is updated delete old image from cloudinary
+    if (req.file) {
+      try {
+        const kitchenImageId = existingKitchen.kitchenImageURL
+          .split("/")
+          .pop()
+          .split(".")[0];
+        console.log("kitchenImageId", kitchenImageId);
+        await cloudinary.uploader.destroy(kitchenImageId);
+      } catch (error) {
+        console.error(
+          "error in deleting old menu image from cloudinary",
+          error
+        );
+        return res.status(500).json({
+          success: false,
+          message: "Internal server error",
+          error: error.message,
+        });
+      }
+      //upload updated image
+      cloudinaryResponse = await uploadImage(req.file.path, "Kitchen");
+    }
+
+    const updatedKitchen = await Kitchen.findByIdAndUpdate(
+      kitchenId,
+      {
+        status,
+        kitchenName,
+        kitchenAddress,
+        category,
+        kitchenImageURL: cloudinaryResponse?.secure_url
+          ? cloudinaryResponse.secure_url
+          : existingKitchen.kitchenImageURL,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({ success: true, kitchen: updatedKitchen });
+  } catch (error) {
+    console.log("error in update kitchen status", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export const getFeaturedKitchens = async (req, res) => {
   try {
@@ -106,7 +164,6 @@ export const getFeaturedKitchens = async (req, res) => {
       success: true,
       featuredKitchens: featured,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
