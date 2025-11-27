@@ -9,6 +9,11 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
+        kitchen:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref:"Kitchen",
+          required:true
+        },
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
