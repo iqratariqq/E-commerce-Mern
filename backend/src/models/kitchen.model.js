@@ -21,11 +21,6 @@ const kitchenSchema = new mongoose.Schema(
       required: true,
     },
 
-    reviews: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Review",
-      default: []
-    }],
 
     kitchenImageURL: {
       type: String,
@@ -66,10 +61,7 @@ const kitchenSchema = new mongoose.Schema(
       }
     },
 
-    avgRating: {
-      type: Number,
-      default: 0
-    }
+
 
   },
   { timestamps: true }

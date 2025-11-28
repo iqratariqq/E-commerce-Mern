@@ -6,15 +6,49 @@ import fs from "fs";
 
 export const getAllKitchen = async (req, res) => {
   try {
-    const kitchen = await Kitchen.find({}).populate(
-      "kitchenOwner reviews",
-      "userName location rating comment"
-    );
+    const kitchen = await Kitchen.aggregate([
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id", 
+          foreignField: "kitchenId",
+          as: "reviews"
+        }},
+        {
+          $addFields: {
+            avgRating: { $avg: "$reviews.rating" } ,
+            reviewsCount: { $size: "$reviews" }   
+        }
+      },
+      {
+        $lookup:{
+          from:"users",
+          localField:"kitchenOwner",
+          foreignField:"_id",
+          as:"kitchenOwnerDetails"
+        }
+
+      },{
+        $unwind:"$kitchenOwnerDetails"
+      }
+
+      ,{
+        $project: {
+          reviews: 0,
+          kitchenOwnerDetails: { password: 0, email: 0, role: 0, createdAt: 0, updatedAt: 0,requestStatus:0,__v:0,cartItem: 0 },
+    
+        }
+      }
+    ])
     if (!kitchen) {
       return res
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
+
+
+
+   
 
     return res.status(200).json({ success: true, kitchen });
   } catch (error) {
@@ -103,10 +137,9 @@ export const deleteKitchenById = async (req, res) => {
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
-  
 
     const kitchen = await Kitchen.findByIdAndDelete(kitchenId);
-    
+
     //first delete kitchen from db then delete image from cloudinary
     await cloudinary.uploader.destroy(existingKitchen.kitchenImageId);
     return res.status(200).json({
@@ -165,11 +198,9 @@ export const updateKitchen = async (req, res) => {
     //if image is updated delete old image from cloudinary
     if (req.file) {
       try {
- 
         await cloudinary.uploader.destroy(existingKitchen.kitchenImageId);
         //upload new image
         cloudinaryResponse = await uploadImage(req.file.path, "kitchenImages");
-
       } catch (error) {
         console.error(
           "error in deleting old menu image from cloudinary",

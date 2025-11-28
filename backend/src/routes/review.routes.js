@@ -5,7 +5,7 @@ import { addReview, deleteReview, getReviews } from "../controller/review.contro
 
 const router=express.Router();
 
-router.get("/",protectRoute,getReviews)
+router.get("/:id",protectRoute,getReviews)
 router.post("/:id",protectRoute,isCustomer,addReview)
 router.delete("/:id",protectRoute,isCustomer,deleteReview)
 
