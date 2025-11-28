@@ -30,5 +30,5 @@ const couponSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Coupon=new mongoose.Model("Coupon",couponSchema)
+const Coupon=new mongoose.model("Coupon",couponSchema)
 export default Coupon

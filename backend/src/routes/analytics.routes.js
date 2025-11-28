@@ -1,10 +1,10 @@
 import express from "express";
-import { isAdmin, isVendor, protectRoute } from "../middelware/auth.middelware";
+import { isAdmin, isVendor, protectRoute } from "../middelware/auth.middelware.js";
 import {
   getAnalytics,
   getDailySalesData,
   getKitchenSalesData,
-} from "../controller/analytics.controller";
+} from "../controller/analytics.controller.js";
 
 const router = express.Router();
 

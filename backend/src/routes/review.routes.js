@@ -1,7 +1,7 @@
 import express from "express"
-import { isCustomer, protectRoute } from "../middelware/auth.middelware";
+import { isCustomer, protectRoute } from "../middelware/auth.middelware.js";
 
-import { addReview, deleteReview, getReviews } from "../controller/review.controller";
+import { addReview, deleteReview, getReviews } from "../controller/review.controller.js";
 
 const router=express.Router();
 

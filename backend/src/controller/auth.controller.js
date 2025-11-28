@@ -17,7 +17,7 @@ import  { uploadImage } from "../Utils/cloudniray.js";
 
 export const signup = async (req, res) => {
   const{role}=req.params
-  const { userName, email, password,phoneNumber } = req.body;
+  const { userName, email, password,phoneNumber,address } = req.body;
   try {
     if (!userName || !email || !password || !phoneNumber) {
       return res.status(400).json({ message: "all fields are required" });
@@ -29,7 +29,7 @@ export const signup = async (req, res) => {
         message: "invalid email",
       });
     }
-    const alreadyExit = await User.findOne({ email });
+    const alreadyExit = await User.findOne({ email }).lean();
     if (alreadyExit) {
       return res
         .status(409)
@@ -121,7 +121,7 @@ export const login = async (req, res) => {
           .json({ succuss: false, message: "invalid password" });
       }
     }
-    if(user.status!=="active"){
+    if(user.requestStatus!=="active"){
       return res.status(403).json({success:false,message:"your account is not active, please contact to admin"})
     }
 

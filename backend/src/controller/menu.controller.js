@@ -254,7 +254,7 @@ export const getRecommendedMenu = async (req, res) => {
   }
 };
 
-export const toggleFeaturedroduct = async (req, res) => {
+export const toggleFeaturedMenu = async (req, res) => {
   try {
     const { id } = req.params;
     const featuredMenu = await Menu.findById(id);
