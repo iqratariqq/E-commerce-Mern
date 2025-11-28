@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import Kitchen from "../models/kitchen.model.js";
+
 import bcryptjs from "bcryptjs";
 import {
   generateAccessToken,
@@ -11,7 +11,7 @@ import {
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "../Utils/redis.js";
-import  { uploadImage } from "../Utils/cloudniray.js";
+
 
 // register controller
 
@@ -72,32 +72,7 @@ export const signup = async (req, res) => {
   }
 };
 
-export const registerKitchen=async(req,res)=>{
-  try {
-    const{name:kitchenName,address:kitchenAddress,kitchenImageURL,cetagory}=req.body
-   
-    const kitchenOwner=req.user._id
-    const owner=await User.findById(kitchenOwner)
-    if(!owner || owner.role!=="vendor" ){
-      return res.status(403).json({success:false,message:"only vendor can register kitchen"})
-    }
-    const cloudinaryResponse = await uploadImage(req.file.path,'kitchenImages')
 
-    const newKitchen=new Kitchen({
-      kitchenName,
-      kitchenOwner, 
-      kitchenAddress,
-      cetagory,
-      kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " "
-    });
-    await newKitchen.save();
-    res.status(201).json({success:true,message:"kitchen registered successfully",kitchen:newKitchen})
-  } catch (error) {
-    console.error("error in registering kitchen",error);
-    res.status(500).json({success:false,message:"internal server error",error:error?.message})
-    
-  }
-}
 
 export const login = async (req, res) => {
   const { email, password } = req.body;

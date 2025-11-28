@@ -6,6 +6,6 @@ import { getPendingVendors, updateVendorStatus } from "../controller/admin.contr
 const router = express.Router();
 
 router.get("/", protectRoute, isAdmin,getPendingVendors )
-router.patch("/update-vendor/:Id",protectRoute,isAdmin,updateVendorStatus)
+router.patch("/update-vendor/:id",protectRoute,isAdmin,updateVendorStatus)
 
 export default router;

@@ -27,6 +27,7 @@ export const protectRoute = async (req, res, next) => {
         .status(404)
         .json({ message: "User not found by userID in token " });
     }
+
     req.user = user;
     next();
   } catch (error) {
@@ -38,6 +39,7 @@ export const protectRoute = async (req, res, next) => {
 //checking for admin role
 export const isVendor = (req, res, next) => {
     try {
+      console.log("req.user:", req.user);
         if (req.user?.role === "vendor" && req.user?.requestStatus==="active" ) {
             return next();
         }

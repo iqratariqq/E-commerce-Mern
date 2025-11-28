@@ -41,7 +41,7 @@ const kitchenSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["close","open","busy"],
-      default: "close"
+      default: "open"
     },
 
     menuItems: [{
@@ -58,7 +58,7 @@ const kitchenSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number], // [lng, lat]
-        required: true
+        default: [0, 0]
       }
     },
 

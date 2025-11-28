@@ -1,5 +1,7 @@
 import Kitchen from "../models/kitchen.model.js";
 import Review from "../models/review.model.js";
+import User from "../models/user.model.js";
+import { uploadImage } from "../Utils/cloudniray.js";
 
 export const getAllKitchen = async (req, res) => {
   try {
@@ -19,6 +21,39 @@ export const getAllKitchen = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const registerKitchen=async(req,res)=>{
+  try {
+    const{kitchenName,kitchenAddress,category}=req.body
+   
+    const kitchenOwner=req.user._id
+    let cloudinaryResponse =null
+    const owner=await User.findById(kitchenOwner)
+    if(!owner || owner.role!=="vendor" ){
+      return res.status(403).json({success:false,message:"only vendor can register kitchen"})
+    }
+    try {
+      
+      cloudinaryResponse = await uploadImage(req.file.path,'kitchenImages')
+    } catch (error) {
+      throw new Error("Image upload failed");
+    }
+
+    const newKitchen=new Kitchen({
+      kitchenName,
+      kitchenOwner, 
+      kitchenAddress,
+      category,
+      kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " "
+    });
+    await newKitchen.save();
+    res.status(201).json({success:true,message:"kitchen registered successfully",kitchen:newKitchen})
+  } catch (error) {
+    console.error("error in registering kitchen",error);
+    res.status(500).json({success:false,message:"internal server error",error:error?.message})
+    
+  }
+}
 
 export const deleteKitchenById = async (req, res) => {
   try {

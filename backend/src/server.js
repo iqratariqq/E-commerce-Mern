@@ -8,6 +8,8 @@ import couponRoutes from "./routes/coupon.route.js";
 import analyticsRoutes from "./routes/analytics.routes.js"
 import payementRoutes from "./routes/payment.route.js"
 import reviewRoutes from "./routes/review.routes.js";
+import adminRoutes from "./routes/admin.routes.js"
+import kitchenRoutes from "./routes/kitchen.routes.js"
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -22,10 +24,12 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/analytics",analyticsRoutes)
 app.use("/api/payment",payementRoutes)
+app.use("/api/kitchen",kitchenRoutes)
 app.use("/api/reviews",reviewRoutes)
 
 connectDB().then(() => {
