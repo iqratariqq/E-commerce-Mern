@@ -39,7 +39,7 @@ export const protectRoute = async (req, res, next) => {
 //checking for admin role
 export const isVendor = (req, res, next) => {
     try {
-      console.log("req.user:", req.user);
+
         if (req.user?.role === "vendor" && req.user?.requestStatus==="active" ) {
             return next();
         }
