@@ -1,12 +1,29 @@
+import Menu from "../models/menu.model.js";
 import User from "../models/user.model.js";
 
 export const getCartItems = async (req, res) => {
   try {
     const user = req.user;
-    const userProducts = await User.findById(user._id)
-      .select("cartItem")
-      .populate("cartItem.product");
-    if (userProducts.cartItem.length === 0) {
+    const userProducts = await User.aggregate([
+      { $match: { _id: user._id } },
+      { $unwind: "$cartItem" },
+      { $lookup: {
+          from: "menus",
+          localField: "cartItem.product",
+          foreignField: "_id",
+          as: "productDetails"
+        }},{$unwind: "$productDetails"
+
+        }
+        ,{$lookup:{
+          from:"kitchens",
+          localField:"productDetails.kitchen",
+          foreignField:"_id",
+          as: "kitchenDetails"
+        }}
+    ])
+  
+    if (userProducts.cartItem?.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });
     }
     return res.status(200).json({ sucess: true, userProducts });
@@ -24,7 +41,12 @@ export const addtoCart = async (req, res) => {
     const { id: productId } = req.body;
     const user = req.user;
 
-    const existingItem = await user.cartItem.find(
+    const product=await Menu.findById(productId);
+    if(!product || !product?.isAvailable){
+      return res.status(404).json({success:false,message:"product not found or unavailable"})
+    }
+
+    const existingItem = await user.cartItem.find(                                                                                                                                                                                                                        
       (item) => item.product.toString() == productId
     );
     if (existingItem) {

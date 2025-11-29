@@ -30,7 +30,7 @@ const menuSchema = new mongoose.Schema(
       enum: ["Lunch", "Dinner", "Breakfast", "Snacks", "Beverages"],
       default: "Lunch",
     },
-    available: {
+    isAvailable: {
       type: Boolean,
       default: true,
     },
