@@ -2,6 +2,7 @@ import Menu from "../models/menu.model.js";
 import { redis } from "../Utils/redis.js";
 import cloudinary, { uploadImage } from "../Utils/cloudniray.js";
 import kitchen from "../models/kitchen.model.js";
+import fs from "fs";
 
 export const getKitchenMenu = async (req, res) => {
   try {
@@ -59,8 +60,10 @@ export const getFeaturedMenu = async (req, res) => {
 };
 
 export const addMenu = async (req, res) => {
-  const kitchenId = req.params.kitchenId;
-  const { name, price, description, category, quantity, available } = req.body;
+  const kitchenId = req.params.id;
+
+  const { name, price, description, category, available } = req.body;
+  let cloudinaryResponse = null;
   try {
     const kitchenExists = await kitchen.findById(kitchenId);
     if (!kitchenExists) {
@@ -69,19 +72,41 @@ export const addMenu = async (req, res) => {
         .json({ success: false, message: "kitchen not found" });
     }
 
-    const cloudinaryResponse = await uploadImage(req.file.path, "Menu");
+
+    if (kitchenExists.kitchenOwner.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "you are not authorized to add menu to this kitchen",
+        });
+    }
+
+    try {
+      cloudinaryResponse = await uploadImage(req.file.path, "Menu");
+    } catch (error) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(
+            "error in deleting file after cloudinary upload failure",
+            err
+          );
+        }
+      });
+    }
+
     const menu = new Menu({
       kitchen: kitchenId,
       name,
       price,
       description,
       category,
-      quantity,
       imageURL: cloudinaryResponse?.secure_url
         ? cloudinaryResponse.secure_url
         : " ",
       available,
     });
+    
     await menu.save();
     kitchenExists.menuItems.push(menu._id);
     await kitchenExists.save();
@@ -90,6 +115,15 @@ export const addMenu = async (req, res) => {
       .json({ success: true, menu, kitchen: kitchenExists });
   } catch (error) {
     console.error("error in addMenu controller", error);
+
+    fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(
+            "error in deleting file after cloudinary upload failure",
+            err
+          );
+        }
+      });
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -100,39 +134,48 @@ export const addMenu = async (req, res) => {
 
 export const updateMenu = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { name, price, description, available, category } =
-      req.body;
-      let cloudinaryResponse =null;
+    const { id: menuId } = req.params;
+    const { name, price, description, available, category } = req.body;
+    let cloudinaryResponse = null;
 
-    const menu = await Menu.findById(id);
+    const menu = await Menu.findById(menuId);
     if (!menu) {
       return res
         .status(404)
         .json({ success: false, message: "menu not found" });
     }
+    if (menu.kitchen !== req.user._id) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "you are not authorized to update this menu",
+        });
+    }
 
     //if image is updated delete old image from cloudinary
-    if(req.file){
+    if (req.file) {
       try {
         const menuImageId = menu.imageURL.split("/").pop().split(".")[0];
         console.log("menuImageId", menuImageId);
         await cloudinary.uploader.destroy(menuImageId);
+        //upload new image
+        cloudinaryResponse = await uploadImage(req.file.path, "Menu");
       } catch (error) {
-        console.error("error in deleting old menu image from cloudinary", error);
+        console.error(
+          "error in deleting old menu image from cloudinary",
+          error
+        );
         return res.status(500).json({
           success: false,
           message: "Internal server error",
           error: error.message,
         });
       }
-      //upload updated image
-       cloudinaryResponse = await uploadImage(req.file.path, "Menu");
     }
 
-
     const updatedMenu = await Menu.findByIdAndUpdate(
-      id,
+      menuId,
       {
         name,
         price,
@@ -148,7 +191,11 @@ export const updateMenu = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "menu update successfully", updatedMenu });
+      .json({
+        success: true,
+        message: "menu update successfully",
+        updatedMenu,
+      });
   } catch (error) {
     console.error("error in update menu controller", error);
     return res.status(500).json({
@@ -169,8 +216,18 @@ export const deleteMenu = async (req, res) => {
     if (!menu) {
       return res
         .status(404)
-        .json({ message: false, message: "menu not found" });
+        .json({ success: false, message: "menu not found" });
     }
+
+    if (menu.kitchen !== req.user._id) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "you are not authorized to update this menu",
+        });
+    }
+
     if (menu.imageURL) {
       try {
         const menuImageId = menu.imageURL.split("/").pop().split(".")[0];
@@ -206,12 +263,14 @@ export const deleteMenu = async (req, res) => {
   }
 };
 
-
 export const getCategoryMenu = async (req, res) => {
   try {
-    const { category,kitchenId } = req.params;
+    const { category, kitchenId } = req.params;
 
-    const categoryMenu = await Menu.find({ category, kitchen: kitchenId }).populate("kitchen", "kitchenName kitchenAddress kitchen");
+    const categoryMenu = await Menu.find({
+      category,
+      kitchen: kitchenId,
+    }).populate("kitchen", "kitchenName kitchenAddress kitchen");
     if (categoryMenu.length === 0) {
       return res.status(404).json({
         success: false,
@@ -228,7 +287,6 @@ export const getCategoryMenu = async (req, res) => {
     });
   }
 };
-
 
 //todo: get recommended products based on random selection
 

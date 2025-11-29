@@ -25,7 +25,7 @@ router.get("/category-products/:category", getCategoryMenu);
 router.get("/recommended-products", getRecommendedMenu);
 
 router.post(
-  "/",
+  "/:id",
   protectRoute,
   isVendor,
   upload.single("productImage"),
