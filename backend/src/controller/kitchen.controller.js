@@ -10,45 +10,50 @@ export const getAllKitchen = async (req, res) => {
       {
         $lookup: {
           from: "reviews",
-          localField: "_id", 
+          localField: "_id",
           foreignField: "kitchenId",
-          as: "reviews"
-        }},
-        {
-          $addFields: {
-            avgRating: { $avg: "$reviews.rating" } ,
-            reviewsCount: { $size: "$reviews" }   
-        }
+          as: "reviews",
+        },
       },
       {
-        $lookup:{
-          from:"users",
-          localField:"kitchenOwner",
-          foreignField:"_id",
-          as:"kitchenOwnerDetails"
-        }
+        $addFields: {
+          avgRating: { $avg: "$reviews.rating" },
+          reviewsCount: { $size: "$reviews" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "kitchenOwner",
+          foreignField: "_id",
+          as: "kitchenOwnerDetails",
+        },
+      },
+      {
+        $unwind: "$kitchenOwnerDetails",
+      },
 
-      },{
-        $unwind:"$kitchenOwnerDetails"
-      }
-
-      ,{
+      {
         $project: {
           reviews: 0,
-          kitchenOwnerDetails: { password: 0, email: 0, role: 0, createdAt: 0, updatedAt: 0,requestStatus:0,__v:0,cartItem: 0 },
-    
-        }
-      }
-    ])
+          kitchenOwnerDetails: {
+            password: 0,
+            email: 0,
+            role: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            requestStatus: 0,
+            __v: 0,
+            cartItem: 0,
+          },
+        },
+      },
+    ]);
     if (!kitchen) {
       return res
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
-
-
-
-   
 
     return res.status(200).json({ success: true, kitchen });
   } catch (error) {
@@ -94,23 +99,11 @@ export const registerKitchen = async (req, res) => {
       kitchenAddress,
       category,
       kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " ",
-      kitchenImageId: cloudinaryResponse ? cloudinaryResponse.public_id : "",
     });
 
     //save kitchen to db
-    try {
-      await newKitchen.save();
-    } catch (error) {
-      //if error occurs delete uploaded image from cloudinary
-      if (cloudinaryResponse?.public_id) {
-        await cloudinary.uploader.destroy(cloudinaryResponse.public_id);
-      }
-      return res.status(500).json({
-        success: false,
-        message: "error in saving kitchen to db",
-        error: error?.message,
-      });
-    }
+
+    await newKitchen.save();
 
     return res.status(201).json({
       success: true,
@@ -119,7 +112,9 @@ export const registerKitchen = async (req, res) => {
     });
   } catch (error) {
     console.error("error in registering kitchen", error);
-
+    if (cloudinaryResponse?.public_id) {
+      await cloudinary.uploader.destroy(cloudinaryResponse.public_id);
+    }
     return res.status(500).json({
       success: false,
       message: "internal server error",
@@ -140,8 +135,17 @@ export const deleteKitchenById = async (req, res) => {
 
     const kitchen = await Kitchen.findByIdAndDelete(kitchenId);
 
+    const urlParts = kitchen.kitchenImageURL.split("/");
+    const folder = urlParts[urlParts.length - 2];
+    const fileNameWithExt = urlParts[urlParts.length - 1];
+    const fileName = fileNameWithExt.split(".")[0];
+
+    const publicId = `${folder}/${fileName}`;
     //first delete kitchen from db then delete image from cloudinary
-    await cloudinary.uploader.destroy(existingKitchen.kitchenImageId);
+    const responce = await cloudinary.uploader.destroy(publicId);
+    if (responce.result !== "ok") {
+      throw new Error("failed to delete kitchen image from cloudinary");
+    }
     return res.status(200).json({
       success: true,
       message: "kitchen deleted successfully",
@@ -194,33 +198,22 @@ export const updateKitchen = async (req, res) => {
     const updateData = {};
     let cloudinaryResponse = null;
 
-    console.log("req.file in updateKitchen", req.file);
     //if image is updated delete old image from cloudinary
     if (req.file) {
-      try {
-        await cloudinary.uploader.destroy(existingKitchen.kitchenImageId);
-        //upload new image
-        cloudinaryResponse = await uploadImage(req.file.path, "kitchenImages");
-      } catch (error) {
-        console.error(
-          "error in deleting old menu image from cloudinary",
-          error
-        );
-        fs.unlink(req.file.path, (err) => {
-          if (err) {
-            console.error("Error deleting file after upload failure:", err);
-          }
-        });
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error",
-          error: error.message,
-        });
-      }
+      const urlParts = existingKitchen.kitchenImageURL.split("/");
+      const folder = urlParts[urlParts.length - 2];
+      const fileNameWithExt = urlParts[urlParts.length - 1];
+      const fileName = fileNameWithExt.split(".")[0];
 
-      //upload updated image
+      const publicId = `${folder}/${fileName}`;
+      const responce = await cloudinary.uploader.destroy(publicId);
+      if (responce.result !== "ok") {
+        throw new Error("failed to delete kitchen image from cloudinary");
+      }
+      //upload new image
+      cloudinaryResponse = await uploadImage(req.file.path, "kitchenImages");
     }
-    console.log("req.body", req.body);
+  
 
     if (req.body?.status) updateData.status = req.body.status;
     if (req.body?.kitchenName) updateData.kitchenName = req.body.kitchenName;
@@ -240,6 +233,11 @@ export const updateKitchen = async (req, res) => {
 
     return res.status(200).json({ success: true, kitchen: updatedKitchen });
   } catch (error) {
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.error("Error deleting file after failure:", err);
+      }
+    });
     console.log("error in update kitchen status", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }

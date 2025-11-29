@@ -26,10 +26,6 @@ const kitchenSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
-    kitchenImageId: {
-      type: String,
-      default: ""
-    },
 
     category: {
       type: String,
@@ -45,7 +41,7 @@ const kitchenSchema = new mongoose.Schema(
 
     menuItems: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "Menu",
       default: []
     }],
 

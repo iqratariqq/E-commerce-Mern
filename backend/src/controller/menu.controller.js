@@ -6,20 +6,21 @@ import fs from "fs";
 
 export const getKitchenMenu = async (req, res) => {
   try {
-    const { kitchenId } = req.params;
+    const { id:kitchenId } = req.params;
     if (!kitchenId) {
       return res
         .status(400)
         .json({ success: false, message: "kitchenId is required" });
     }
 
-    const kitchenMenu = await kitchen.findById(kitchenId).populate("menuItems");
+    const kitchenMenu = await kitchen.findById(kitchenId).populate("menuItems","name price description category imageURL available");
     if (!kitchenMenu || kitchenMenu.menuItems.length === 0) {
       return res.status(404).json({ success: false, message: "No Menu found" });
     }
     return res
       .status(200)
       .json({ success: true, Menus: kitchenMenu.menuItems });
+
   } catch (error) {
     console.error("error in getMenu controller", error);
     return res
@@ -72,14 +73,11 @@ export const addMenu = async (req, res) => {
         .json({ success: false, message: "kitchen not found" });
     }
 
-
     if (kitchenExists.kitchenOwner.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "you are not authorized to add menu to this kitchen",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "you are not authorized to add menu to this kitchen",
+      });
     }
 
     try {
@@ -106,7 +104,7 @@ export const addMenu = async (req, res) => {
         : " ",
       available,
     });
-    
+
     await menu.save();
     kitchenExists.menuItems.push(menu._id);
     await kitchenExists.save();
@@ -117,13 +115,13 @@ export const addMenu = async (req, res) => {
     console.error("error in addMenu controller", error);
 
     fs.unlink(req.file.path, (err) => {
-        if (err) {
-          console.error(
-            "error in deleting file after cloudinary upload failure",
-            err
-          );
-        }
-      });
+      if (err) {
+        console.error(
+          "error in deleting file after cloudinary upload failure",
+          err
+        );
+      }
+    });
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -144,34 +142,29 @@ export const updateMenu = async (req, res) => {
         .status(404)
         .json({ success: false, message: "menu not found" });
     }
-    if (menu.kitchen !== req.user._id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "you are not authorized to update this menu",
-        });
+    const kitchenExists = await kitchen.findById(menu.kitchen);
+
+    if (kitchenExists.kitchenOwner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "you are not authorized to update this menu",
+      });
     }
 
     //if image is updated delete old image from cloudinary
     if (req.file) {
-      try {
-        const menuImageId = menu.imageURL.split("/").pop().split(".")[0];
-        console.log("menuImageId", menuImageId);
-        await cloudinary.uploader.destroy(menuImageId);
-        //upload new image
-        cloudinaryResponse = await uploadImage(req.file.path, "Menu");
-      } catch (error) {
-        console.error(
-          "error in deleting old menu image from cloudinary",
-          error
-        );
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error",
-          error: error.message,
-        });
+      const urlParts = menu.imageURL.split("/");
+      const folder = urlParts[urlParts.length - 2];
+      const fileNameWithExt = urlParts[urlParts.length - 1];
+      const fileName = fileNameWithExt.split(".")[0];
+
+      const publicId = `${folder}/${fileName}`;
+      const result = await cloudinary.uploader.destroy(publicId);
+      if (result.result !== "ok") {
+        throw new Error("failed to delete old image from cloudinary");
       }
+      //upload new image
+      cloudinaryResponse = await uploadImage(req.file.path, "Menu");
     }
 
     const updatedMenu = await Menu.findByIdAndUpdate(
@@ -189,13 +182,12 @@ export const updateMenu = async (req, res) => {
       { new: true }
     );
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "menu update successfully",
-        updatedMenu,
-      });
+    
+    return res.status(200).json({
+      success: true,
+      message: "menu update successfully",
+      updatedMenu,
+    });
   } catch (error) {
     console.error("error in update menu controller", error);
     return res.status(500).json({
@@ -208,7 +200,6 @@ export const updateMenu = async (req, res) => {
 
 export const deleteMenu = async (req, res) => {
   try {
-    const kitchenId = req.params.kitchenId;
     const { id } = req.params;
 
     const menu = await Menu.findById(id);
@@ -218,38 +209,37 @@ export const deleteMenu = async (req, res) => {
         .status(404)
         .json({ success: false, message: "menu not found" });
     }
+    const kitchenExists = await kitchen.findById(menu.kitchen).lean();
 
-    if (menu.kitchen !== req.user._id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "you are not authorized to update this menu",
-        });
+    if (kitchenExists.kitchenOwner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "you are not authorized to delete this menu",
+      });
     }
 
     if (menu.imageURL) {
-      try {
-        const menuImageId = menu.imageURL.split("/").pop().split(".")[0];
-        console.log("menuImageId", menuImageId);
-        await cloudinary.uploader.destroy(menuImageId);
-      } catch (error) {
-        console.error("error in deleting menu image from cloudinary", error);
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error",
-          error: error.message,
-        });
+      const urlParts = menu.imageURL.split("/");
+      const folder = urlParts[urlParts.length - 2];
+      const fileNameWithExt = urlParts[urlParts.length - 1];
+      const fileName = fileNameWithExt.split(".")[0];
+
+      const publicId = `${folder}/${fileName}`;
+      const res = await cloudinary.uploader.destroy(publicId);
+
+      if (res.result !== "ok") {
+        throw new Error("failed to delete image from cloudinary");
       }
     }
 
     await Menu.findByIdAndDelete(id);
 
     await kitchen.findByIdAndUpdate(
-      kitchenId,
+      menu.kitchen,
       { $pull: { menuItems: id } },
       { new: true }
     );
+
     return res
       .status(200)
       .json({ success: true, message: "menu delete successfully" });
@@ -265,7 +255,8 @@ export const deleteMenu = async (req, res) => {
 
 export const getCategoryMenu = async (req, res) => {
   try {
-    const { category, kitchenId } = req.params;
+    const {  kitchenId } = req.params;
+    const { category } = req.body
 
     const categoryMenu = await Menu.find({
       category,
@@ -278,6 +269,7 @@ export const getCategoryMenu = async (req, res) => {
       });
     }
     return res.status(200).json({ success: true, categoryMenu });
+    
   } catch (error) {
     console.error("error in getCategoryMenu controller", error);
     return res.status(500).json({

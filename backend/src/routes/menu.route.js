@@ -17,7 +17,7 @@ import {
 import upload from "../middelware/multer.middelware.js";
 const router = express.Router();
 
-router.get("/", protectRoute, isAdmin, getKitchenMenu);
+router.get("/:id", protectRoute, getKitchenMenu);
 
 //all users can access featured products
 router.get("/featured-products", getFeaturedMenu);
