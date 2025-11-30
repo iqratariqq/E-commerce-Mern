@@ -9,14 +9,9 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
-        kitchen:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref:"Kitchen",
-          required:true
-        },
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: "Menu",
           required: true,
         },
         quantity: {
@@ -34,6 +29,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+    isDelivered: {
+      type: Boolean,
+      default: false,
     },
     stripSessionId: {
       type: String,

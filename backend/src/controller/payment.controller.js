@@ -1,4 +1,5 @@
 import Coupon from "../models/coupon.model.js";
+import Kitchen from "../models/kitchen.model.js";
 import Order from "../models/order.model.js";
 import { stripe } from "../Utils/stripe.js";
 import { findCoupon } from "./coupon.controller.js";
@@ -125,18 +126,16 @@ export const checkoutSuccess = async (req, res) => {
           quantity: p.quantity,
           price: p.price,
         })),
-        totalAmount: session.amount_total/100,
+        totalAmount: session.amount_total / 100,
         stripSessionId: sessionId,
       });
 
       await newOrder.save();
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "order placed successfully",
-          orderId: newOrder._id,
-        });
+      res.status(200).json({
+        success: true,
+        message: "order placed successfully",
+        orderId: newOrder._id,
+      });
     } else {
       res
         .status(400)
@@ -151,3 +150,70 @@ export const checkoutSuccess = async (req, res) => {
     });
   }
 };
+
+//---order controller to get user orders
+export const getUserOrders = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const kitchen = await Kitchen.findOne({ kitchenOwner: userId }).select(
+      "menuItems"
+    );
+    const orders = await Order.aggregate([
+      { $match: { "products.product": { $in: kitchen.menuItems }, isDelivered: false } },
+      { $sort: { createdAt: -1 } },
+      {$project:{
+        __v:0
+      }}
+       
+    ]);
+    res.status(200).json({
+      success: true,
+      message: "user orders fetched successfully",
+      orders: orders,
+    });
+  } catch (error) {
+    console.error("error in get user orders controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const checkout = async (req, res) => {
+  try {
+    const { products } = req.body;
+
+    const userId = req.user._id;
+
+    const newOrder = new Order({
+      user: userId,
+      products: products.map((p) => ({
+        product: p.id,
+        quantity: p.quantity,
+        price: p.price,
+      })),
+      totalAmount: products.reduce(
+        (total, p) => total + p.price * p.quantity,
+        0
+      ),
+    });
+    await newOrder.save();
+    res.status(200).json({
+      success: true,
+      message: "order placed successfully",
+      orderId: newOrder._id,
+    });
+  } catch (error) {
+    console.error("error in place order controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+
