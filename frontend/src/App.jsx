@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import Navbar from "./Components/Navbar.jsx";
+import Layout from "./Components/Layout.jsx";
 
 function App() {
   return (
@@ -16,9 +17,11 @@ function App() {
         </div>
       </div>
       <div className="relative z-50 pt-20 " >
-<Navbar/>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Layout>
+            <HomePage/>
+          </Layout>} />
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
         </Routes>
