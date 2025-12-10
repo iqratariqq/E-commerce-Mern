@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
       trim: true,
-      required: [true, "phone number is required"],
+     default:null
     },
     requestStatus: {
       type: String,
