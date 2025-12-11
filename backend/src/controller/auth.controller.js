@@ -17,9 +17,10 @@ import { redis } from "../Utils/redis.js";
 
 export const signup = async (req, res) => {
   const{role}=req.params
-  const { userName, email, password,phoneNumber,address } = req.body;
+  const { userName, email, password } = req.body;
+  console.log(req.body)
   try {
-    if (!userName || !email || !password || !phoneNumber) {
+    if (!userName || !email || !password ) {
       return res.status(400).json({ message: "all fields are required" });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,9 +40,7 @@ export const signup = async (req, res) => {
     const user = new User({
       userName,
       email,
-      address,
       password: hashPassword,
-      phoneNumber,
       role:role === "vendor" ? "vendor" : "customer",
       requestStatus: role === "vendor" ? "pending" : "active",
 

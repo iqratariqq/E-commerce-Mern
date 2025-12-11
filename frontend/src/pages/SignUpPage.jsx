@@ -4,10 +4,15 @@ import Input from '../Components/Input'
 import { useState } from 'react'
 import { Loader, Lock, Mail, User } from 'lucide-react'
 import { Link } from "react-router-dom"
+import { useSignup } from '../hooks/useSignup'
+import toast from 'react-hot-toast'
 
 const SignUpPage = () => {
-  const isLoading=false
-  const [signupDate, setSignupData] = useState(
+
+
+  const { isPending, error, signupMutation } = useSignup();
+  console.log("error",error)
+  const [signupData, setSignupData] = useState(
     {
       userName: "",
       password: "",
@@ -16,12 +21,23 @@ const SignUpPage = () => {
     }
   )
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    
+      if (signupData.confirmPassword !== signupData.password) {
+
+        return toast.error("password must be same")
+      }
+
+      const { confirmPassword, ...newSignUPData } = signupData;
+
+       signupMutation(newSignUPData)
+     
+
 
   }
   return (
-    <div className='py-12'>
+    <div className='lg:py-16 min-h-screen flex justify-center items-center  flex-col border  border-red-700 overflow-y-hidden lg:block'>
       <motion.div initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}>
@@ -34,7 +50,7 @@ const SignUpPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className=" bg-toupe  text-white bg-opacity-35 max-w-md shadow-lg rounded-sm mx-auto  backdrop-blur-xl overflow-hidden"
+        className=" bg-toupe  text-white bg-opacity-35 max-w-md w-full shadow-lg rounded-sm mx-auto  backdrop-blur-xl overflow-hidden"
       >
         <div className='p-6'>
 
@@ -50,8 +66,8 @@ const SignUpPage = () => {
                 label="userName"
                 type="userName"
                 placeholder="ali"
-                value={signupDate.userName}
-                onChange={(e) => setSignupData({ ...signupDate, userName: e.target.value })}
+                value={signupData.userName}
+                onChange={(e) => setSignupData({ ...signupData, userName: e.target.value })}
               />
             </div>
 
@@ -65,8 +81,8 @@ const SignUpPage = () => {
                 label="email"
                 type="email"
                 placeholder="h12@gmail.com"
-                value={signupDate.email}
-                onChange={(e) => setSignupData({ ...signupDate, email: e.target.value })}
+                value={signupData.email}
+                onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
               />
             </div>
 
@@ -80,8 +96,8 @@ const SignUpPage = () => {
                 label="password"
                 type="password"
                 placeholder="******"
-                value={signupDate.password}
-                onChange={(e) => setSignupData({ ...signupDate, password: e.target.value })}
+                value={signupData.password}
+                onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
               />
             </div>
 
@@ -95,26 +111,34 @@ const SignUpPage = () => {
                 label="confirmPassword"
                 type="password"
                 placeholder="******"
-                value={signupDate.confirmPassword}
-                onChange={(e) => setSignupData({ ...signupDate, confirmPassword: e.target.value })}
+                value={signupData.confirmPassword}
+                onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
               />
             </div>
+                {error && (
+                  
+                  <p className="bg-red-700 text-white-500 mt-2 p-2 rounded-lg">
+                    {" "}
+                    {error.response?.data?.message || error.message}
+                  </p>
+                )}
+               
 
-            <motion.button className='w-full bg-toupe p-3 mt-4 text-xl font-bold  outline-none rounded-md hover:bg-pupkin_spice focus:outline-none focus:ring-2 focus:ring-toupe focus:ring-opacity-35 tansition duration-700 '
+            <motion.button className='w-full bg-toupe p-3 text-xl font-bold  outline-none rounded-md hover:bg-pupkin_spice focus:outline-none focus:ring-2 focus:ring-toupe focus:ring-opacity-35 tansition duration-700 '
               type='submit'
               whileHover={{ scale: 1.02 }}
               whileTap={{
                 scale: 0.5
 
               }}
-              disabled={isLoading}
+              disabled={isPending}
             >
-              {isLoading?<div className='flex justify-center gap-3'>
-              <Loader className="animate-spin" size={20}/>
-              <span className='text-sm font-medium '>Loading...</span>
-              </div>:<>
+              {isPending ? <div className='flex justify-center gap-3'>
+                <Loader className="animate-spin" size={20} />
+                <span className='text-sm font-medium '>Loading...</span>
+              </div> : <>
 
-              SignUp
+                SignUp
               </>}
             </motion.button>
           </form>

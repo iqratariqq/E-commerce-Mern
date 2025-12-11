@@ -6,25 +6,35 @@ import Layout from "./Components/Layout.jsx";
 import { useAuth } from "./hooks/useAuth.js";
 import Loader from "./Components/Loader.jsx"
 import CartPage from "./Pages/CartPage.jsx";
+import { Toaster } from "react-hot-toast";
 
 function App() {
 
   const { isLoading, user } = useAuth()
+  const isAuthenticated = !!user
 
-  
+
 
 
   if (isLoading) return <Loader />
 
-  function RedirectRoute({ children }) {
+  function RedirectAuthenticatedUser({ children }) {
 
+    if (isAuthenticated) {
+
+      return <Navigate to="/" replace />
+    }
+
+    return children
 
   }
 
   function ProtectRoute({ children }) {
-    if (!!user) {
+    if (!isAuthenticated) {
+
       return <Navigate to="/" replace />
     }
+
     return children
   }
 
@@ -43,13 +53,24 @@ function App() {
 
 
 
-      <div className="relative z-50 pt-20 " >
+      <div className="relative z-50 " >
         <Routes>
           <Route path="/" element={<Layout>
             <HomePage />
           </Layout>} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/login" element={
+            <RedirectAuthenticatedUser>
+
+              <LoginPage />
+            </RedirectAuthenticatedUser>
+          } />
+          <Route path="/signup" element={
+            <RedirectAuthenticatedUser>
+
+              <SignUpPage />
+            </RedirectAuthenticatedUser>
+
+          } />
 
           <Route path="/cart" element={
             <ProtectRoute>
@@ -57,6 +78,7 @@ function App() {
             </ProtectRoute>
           } />
         </Routes>
+        <Toaster/>
       </div>
 
     </div>
