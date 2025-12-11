@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import Input from '../Components/Input'
 import { useState } from 'react'
-import { Loader, Lock, User } from 'lucide-react'
+import { Loader, Lock, Mail, User } from 'lucide-react'
 import { Link } from "react-router-dom"
 import { useLogin } from "../hooks/useLogin"
 
 const LoginPage = () => {
   const { isPending, error, loginMutation } = useLogin()
-  
+
   const [loginData, setLoginData] = useState(
     {
-      userName: "",
+      email: "",
       password: "",
 
     }
@@ -45,16 +45,16 @@ const LoginPage = () => {
 
             <div className="form-controller">
               <label className="label">
-                <span className="label-text">UserName</span>
+                <span className="label-text">email</span>
               </label>
               <Input
-                id="name"
-                icon={User}
-                label="userName"
-                type="userName"
-                placeholder="ali"
-                value={loginData.userName}
-                onChange={(e) => setLoginData({ ...loginData, userName: e.target.value })}
+                id="email"
+                icon={Mail}
+                label="email"
+                type="email"
+                placeholder="h12@gmail.com"
+                value={loginData.email}
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
               />
             </div>
 
