@@ -1,4 +1,4 @@
-import { queryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { user } from "../lib/Api/authApi";
 
 
