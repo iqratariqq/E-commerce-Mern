@@ -12,7 +12,8 @@ function App() {
 
   const { isLoading, user } = useAuth()
   const isAuthenticated = !!user
-
+  console.log("user",user)
+console.log("isauthorized",isAuthenticated)
 
 
 

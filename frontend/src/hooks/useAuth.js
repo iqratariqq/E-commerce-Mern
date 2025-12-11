@@ -9,5 +9,6 @@ export const useAuth = () => {
     retry:false
     
   });
-  return({isLoading:authUser.isLoading,user:authUser?.data?.user})
+
+  return({isLoading:authUser.isLoading,user:authUser?.data})
 };

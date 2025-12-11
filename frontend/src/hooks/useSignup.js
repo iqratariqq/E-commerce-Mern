@@ -3,6 +3,7 @@ import { signUp } from "../lib/Api/authApi";
 import toast from "react-hot-toast";
 
 export const useSignup = () => {
+  
   const queryClient = useQueryClient();
   const signupUser = useMutation({
     mutationKey: ["userSignup"],

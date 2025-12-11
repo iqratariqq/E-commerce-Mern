@@ -11,7 +11,7 @@ const SignUpPage = () => {
 
 
   const { isPending, error, signupMutation } = useSignup();
-  console.log("error",error)
+
   const [signupData, setSignupData] = useState(
     {
       userName: "",
