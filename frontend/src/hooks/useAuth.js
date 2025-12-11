@@ -6,6 +6,7 @@ export const useAuth = () => {
   const authUser = useQuery({
     queryKey: ["authUser"],
     queryFn: user,
+    retry:false
     
   });
   return({isLoading:authUser.isLoading,user:authUser?.data?.user})

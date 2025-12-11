@@ -20,6 +20,7 @@ export const login = async (userData) => {
 
 export const user = async () => {
   try {
+    console.log("in user")
     const res = await axiosInstance.get(`/auth/profile`);
     return res.data;
   } catch (error) {

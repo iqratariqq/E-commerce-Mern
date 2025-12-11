@@ -5,6 +5,7 @@ import User  from "../models/user.model.js";
 //looking for access token in cookies
 export const protectRoute = async (req, res, next) => {
   try {
+ 
     const accesssToken = req.cookies.accessToken;
     if (!accesssToken) {
       return res.status(401).json({success:false, message: "No access token found" });

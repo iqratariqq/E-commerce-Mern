@@ -12,12 +12,20 @@ import adminRoutes from "./routes/admin.routes.js"
 import kitchenRoutes from "./routes/kitchen.routes.js"
 import orderRoutes from "./routes/order.route.js"
 import cookieParser from "cookie-parser";
+import cors from "cors"
 
 const app = express();
+
+app.use(cors({origin:"http://localhost:5173",
+  credentials:true,
+}))
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
+
+
+
 
 app.get("/", (req, res) => {
   res.status(200).json("backend is running ");

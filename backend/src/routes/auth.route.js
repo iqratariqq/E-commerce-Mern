@@ -19,6 +19,7 @@ router.post("/logout", logout);
 
 router.get("/profile", protectRoute, async (req, res) => {
   try {
+    console.log("in profile",req.user)
     return res.status(200).json(req.user);
   } catch (error) {
     return res
