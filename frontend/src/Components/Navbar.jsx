@@ -1,9 +1,11 @@
 import { LogInIcon, ShoppingCart, User2Icon } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useAuth } from "../hooks/useAuth"
+import { getInitials } from "../lib/getInitial";
 
 
 const Navbar = () => {
-  const user = false
+  const {user}=useAuth();
   return (
     <header className=" fixed top-0 w-full border-b  left-0 border-khakhi_beige bg-toupe bg-opacity-60 shadow-lg transition-all duration-300 z-40 backdrop-blur-md  ">
       <div className="container mx-auto px-4 py-3 flex justify-between ">
@@ -18,7 +20,7 @@ const Navbar = () => {
           </Link>
           {user ? (
             <Link to={"/account"} className="relative group"><User2Icon className=" inline-block mr-1 group-hover:text-pupkin_spice text-gray-200" size={20} />
-              <span className="hidden sm:inline text-gray-200 hover:text-pupkin_spice transition-all ease-in-out duration-300">Account</span>
+              <span className="hidden sm:inline text-gray-200 hover:text-pupkin_spice transition-all ease-in-out duration-300">{getInitials(user?.userName|| " ")}</span>
             </Link>
           ) : (<>
             <Link to={"/login"} className="text-white  hover:bg-pupkin_spice transition-all ease-in-out duration-300 flex items-center bg-yellow-900 px-4 py-2 rounded-md">
