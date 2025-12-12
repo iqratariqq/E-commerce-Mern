@@ -2,12 +2,15 @@ import axiosInstance from "../axios";
 
 export const signUp = async (userData) => {
   try {
-    console.log("in signup  ")
-    const res = await axiosInstance.post(`/auth/signup/${"customer"}`, userData);
-    console.log(res.data,"data")
+    console.log("in signup  ");
+    const res = await axiosInstance.post(
+      `/auth/signup/${"customer"}`,
+      userData
+    );
+    console.log(res.data, "data");
     return res.data;
   } catch (error) {
-      console.log("in signup  ")
+    console.log("in signup  ");
     throw error;
   }
 };
@@ -17,20 +20,26 @@ export const login = async (userData) => {
     const res = await axiosInstance.post(`/auth/login`, userData);
     return res.data;
   } catch (error) {
-    console.log("error in signup",error.message)
-        throw error;
-;
+    console.log("error in signup", error.message);
+    throw error;
   }
 };
 
 export const user = async () => {
   try {
-    console.log("in user api")
+    console.log("in user api");
     const res = await axiosInstance.get(`/auth/profile`);
-    console.log(res.data,"res.data")
+    console.log(res.data, "res.data");
     return res.data;
   } catch (error) {
-      throw error;
+    throw error;
+  }
+};
 
+export const logout = async () => {
+  try {
+    await axiosInstance.post(`/auth/logout`);
+  } catch (error) {
+    throw error;
   }
 };
