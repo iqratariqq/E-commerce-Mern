@@ -2,10 +2,14 @@ import { LogInIcon, ShoppingCart, User2Icon } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 import { getInitials } from "../lib/getInitial";
+import { authStores } from "../Store/authStores";
 
 
 const Navbar = () => {
-  const {user}=useAuth();
+
+ const user = authStores(state => state.user);
+console.log("user",user)
+  
   return (
     <header className=" fixed top-0 w-full border-b  left-0 border-khakhi_beige bg-toupe bg-opacity-60 shadow-lg transition-all duration-300 z-40 backdrop-blur-md  ">
       <div className="container mx-auto px-4 py-3 flex justify-between ">

@@ -27,9 +27,7 @@ export const login = async (userData) => {
 
 export const user = async () => {
   try {
-    console.log("in user api");
     const res = await axiosInstance.get(`/auth/profile`);
-    console.log(res.data, "res.data");
     return res.data;
   } catch (error) {
     throw error;

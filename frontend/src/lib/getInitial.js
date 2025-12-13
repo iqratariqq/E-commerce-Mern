@@ -1,6 +1,13 @@
 export const getInitials = (name) => {
-  if (!name) return "";
-  const parts = name.trim().split(" ");
-  const initials = parts.map(p => p[0].toUpperCase()).join("");
-  return initials.slice(0, 2); // maximum 2 letters 
+  if (typeof name !== "string") return "";
+
+  const parts = name
+    .trim()
+    .split(" ")
+    .filter(Boolean); // empty strings hatao
+
+  return parts
+    .map(p => p[0].toUpperCase())
+    .join("")
+    .slice(0, 2);
 };

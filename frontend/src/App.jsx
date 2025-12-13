@@ -12,12 +12,11 @@ function App() {
 
   const { isLoading, user } = useAuth()
   const isAuthenticated = !!user
-  console.log("user",user)
-console.log("isauthorized",isAuthenticated)
 
 
 
   if (isLoading) return <Loader />
+
 
   function RedirectAuthenticatedUser({ children }) {
 
@@ -41,6 +40,7 @@ console.log("isauthorized",isAuthenticated)
 
 
   return (
+
     <div className="min-h-screen bg-pupkin_spice  text-white relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0">
@@ -79,7 +79,7 @@ console.log("isauthorized",isAuthenticated)
             </ProtectRoute>
           } />
         </Routes>
-        <Toaster/>
+        <Toaster />
       </div>
 
     </div>
