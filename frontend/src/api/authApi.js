@@ -1,4 +1,4 @@
-import axiosInstance from "../axios";
+import axiosInstance from "../lib/axios";
 
 export const signUp = async (userData) => {
   try {
@@ -30,8 +30,8 @@ export const user = async () => {
     const res = await axiosInstance.get(`/auth/profile`);
     return res.data;
   } catch (error) {
-  console.log("error in user api",error)
-  return null
+    console.log("error in user api", error);
+    return null;
   }
 };
 
