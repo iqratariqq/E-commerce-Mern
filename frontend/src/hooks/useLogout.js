@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "../api/authApi";
+import { logout } from "../lib/Api/authApi";
 import toast from "react-hot-toast";
 
 export const useLogout = () => {

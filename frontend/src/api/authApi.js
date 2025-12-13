@@ -42,3 +42,7 @@ export const logout = async () => {
     throw error;
   }
 };
+
+export const refreshToken=async()=>{
+  await axiosInstance.post("/auth/refresh-token");
+}
