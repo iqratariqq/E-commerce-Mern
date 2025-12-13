@@ -30,7 +30,8 @@ export const user = async () => {
     const res = await axiosInstance.get(`/auth/profile`);
     return res.data;
   } catch (error) {
-    throw error;
+  console.log("error in user api",error)
+  return null
   }
 };
 

@@ -4,20 +4,14 @@ import { authStores } from "../Store/authStores";
 
 
 
-export const useAuth = () => {
-  const {setUser}=authStores();
-  const authUser = useQuery({
-    queryKey: ["authenticateUser"],
-    queryFn: user,
-    retry:false,
-    
+const useAuthuser = () => {
+  const authUser= useQuery({
+    queryKey: ["authUser"],
+    queryFn:user, 
+    retry: false,
   });
-console.log("in useAuth")
 
-  if(authUser?.data)
-  {
-    setUser(authUser?.data)
-  }
+  return {isLoading:authUser.isLoading,authUser:authUser.data}
+}
 
-  return({isLoading:authUser.isLoading,user:authUser?.data})
-};
+export default useAuthuser

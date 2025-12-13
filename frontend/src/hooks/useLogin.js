@@ -8,7 +8,7 @@ export const useLogin=()=>{
         {
             mutationKey:["userLogin"],
             mutationFn:login,
-            onSuccess:()=>{queryClient.invalidateQueries({queryKey:["authenticateUser"]})
+            onSuccess:()=>{queryClient.invalidateQueries({queryKey:["authUser"]})
         toast.success("Login successfully")},
             onError:(err)=>{
       toast.error(err.response?.data?.message || err.message);

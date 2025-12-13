@@ -3,15 +3,15 @@ import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import Layout from "./Components/Layout.jsx";
-import { useAuth } from "./hooks/useAuth.js";
+import useAuthuser from "./hooks/useAuth.js";
 import Loader from "./Components/Loader.jsx"
 import CartPage from "./Pages/CartPage.jsx";
 import { Toaster } from "react-hot-toast";
 
 function App() {
 
-  const { isLoading, user } = useAuth()
-  const isAuthenticated = !!user
+  const { isLoading, authUser } = useAuthuser()
+  const isAuthenticated = !!authUser
 
 
 

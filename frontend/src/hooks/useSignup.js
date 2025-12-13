@@ -9,7 +9,7 @@ export const useSignup = () => {
     mutationKey: ["userSignup"],
     mutationFn: signUp,
     onSuccess: () => 
-      {queryClient.invalidateQueries({ queryKey: ["authenticateUser"] })
+      {queryClient.invalidateQueries({ queryKey: ["authUser"] })
     toast.success("signup successfully")
 
   },

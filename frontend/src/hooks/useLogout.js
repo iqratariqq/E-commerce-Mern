@@ -7,7 +7,7 @@ export const useLogout = () => {
   const { mutate } = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authenticateUser"] });
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("logout successfully");
     },
     onError: (err) => {
