@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Loader, Lock, Mail, User } from 'lucide-react'
 import { Link } from "react-router-dom"
 import { useLogin } from "../hooks/useLogin"
+import { GoogleLogin } from '@react-oauth/google';
 
 const LoginPage = () => {
   const { isPending, error, loginMutation } = useLogin()
@@ -101,6 +102,14 @@ const LoginPage = () => {
 
 
         </div>
+        <GoogleLogin
+          onSuccess={credentialResponse => {
+            console.log(credentialResponse);
+          }}
+          onError={() => {
+            console.log('Login Failed');
+          }}
+        />;
         <div className='py-5  flex justify-center items-center  bg-toupe bg-opacity-70 gap-2 rounded-md '>
           <p className=' text-sm '> Don't have an account? </p>
           <Link to={"/signup"} className='hover:underline text-pupkin_spice text-sm'>signUp</Link>

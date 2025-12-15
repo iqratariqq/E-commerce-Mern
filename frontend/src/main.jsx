@@ -9,13 +9,13 @@ import {
 
 } from '@tanstack/react-query'
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import "dotenv/config"
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={process.env.CLIENT_ID}> 
+    <GoogleOAuthProvider clientId={clientId}> 
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <App />

@@ -1,4 +1,5 @@
 import axiosInstance from "../lib/axios";
+import { refreshAxios } from "../lib/refreshAxios";
 
 export const signUp = async (userData) => {
   try {
@@ -27,6 +28,7 @@ export const login = async (userData) => {
 
 export const user = async () => {
   try {
+    console.log("in user api");
     const res = await axiosInstance.get(`/auth/profile`);
     return res.data;
   } catch (error) {
@@ -37,12 +39,18 @@ export const user = async () => {
 
 export const logout = async () => {
   try {
+    console.log("in logout api");
     await axiosInstance.post(`/auth/logout`);
   } catch (error) {
-    throw error;
+    console.log("error in logout api", error);
   }
 };
 
-export const refreshToken=async()=>{
-  await axiosInstance.post("/auth/refresh-token");
-}
+export const refreshToken = async () => {
+  try {
+    console.log("in refresh token api");  
+    await refreshAxios.post("/auth/refresh-token");
+  } catch (error) {
+    console.log("error in refresh token api", error);
+  }
+};

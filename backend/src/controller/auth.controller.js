@@ -151,7 +151,7 @@ export const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(401).json({ message: "no refresh token" });
+      return res.status(401).json({ success:false,message: "no refresh token" });
     }
 
     const decode = jwt.verify(
@@ -162,12 +162,13 @@ export const refreshToken = async (req, res) => {
     if (!decode || !decode.userID) {
       return res
         .status(401)
-        .json({ message: "unauthorized, invalid refresh token" });
+        .json({success:false, message: "unauthorized, invalid refresh token" });
     }
     const storedRefreshToken = await redis.get(`refreshToken:${decode.userID}`);
 
     if (storedRefreshToken !== refreshToken) {
       return res.status(401).json({
+        success:false,
         message:
           "unauthorized, invalid refresh token,token not match with redis token",
       });
