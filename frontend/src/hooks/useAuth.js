@@ -8,7 +8,6 @@ const useAuthuser = () => {
     queryFn: user,
     retry: false,
   });
-console.log("in useauth")
   return { isLoading: authUser.isLoading, authUser: authUser.data ,error:authUser.error};
 };
 

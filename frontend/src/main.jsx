@@ -9,18 +9,19 @@ import {
 
 } from '@tanstack/react-query'
 import { GoogleOAuthProvider } from '@react-oauth/google';
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const clientId = import.meta.env.VITE_CLIENT_ID;
+console.log("Client ID:", clientId);
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={clientId}> 
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <GoogleOAuthProvider clientId={clientId}>
+        <BrowserRouter>
           <App />
-        </QueryClientProvider>
-      </BrowserRouter>
-    </GoogleOAuthProvider>
+        </BrowserRouter>
+      </GoogleOAuthProvider>
+    </QueryClientProvider>
   </StrictMode>
 );

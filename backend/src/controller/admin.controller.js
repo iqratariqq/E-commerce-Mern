@@ -29,17 +29,17 @@ export const updateVendorStatus = async (req, res) => {
       .json({
         success: false,
         message: "internal server error",
-        error: error.message,
+        error: error.message
       });
   }
-};
+}
 
 export const getPendingVendors = async (req, res) => {
   try {
     const pendingVendors = await User.find({
       role: "vendor",
       requestStatus: "pending",
-    }).select("-password -__v -createdAt -updatedAt");
+    }).select("-password -__v -createdAt -updatedAt")
     if (pendingVendors.length === 0) {
       return res
         .status(404)
@@ -47,7 +47,7 @@ export const getPendingVendors = async (req, res) => {
     }
     res.status(200).json({ success: true, pendingVendors });
   } catch (error) {
-    console.error("error in getPendingVendors controller", error);
+    console.error("error in getPendingVendors controller", error)
     return res
       .status(500)
       .json({

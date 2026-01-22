@@ -6,8 +6,12 @@ import { Loader, Lock, Mail, User } from 'lucide-react'
 import { Link } from "react-router-dom"
 import { useSignup } from '../hooks/useSignup'
 import toast from 'react-hot-toast'
+import { GoogleLogin } from '@react-oauth/google';
+import {jwtDecode} from 'jwt-decode';
 
 const SignUpPage = () => {
+
+
 
 
   const { isPending, error, signupMutation } = useSignup();
@@ -21,18 +25,28 @@ const SignUpPage = () => {
     }
   )
 
+  const handleGoogleLogin=(credentialResponse)=>{
+    const decoded = jwtDecode(credentialResponse.credential);
+    const googleUserData = {
+      userName: decoded.name,
+      email: decoded.email,
+      password: "googleUserPassword"
+    };
+    signupMutation(googleUserData);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-      if (signupData.confirmPassword !== signupData.password) {
 
-        return toast.error("password must be same")
-      }
+    if (signupData.confirmPassword !== signupData.password) {
 
-      const { confirmPassword, ...newSignUPData } = signupData;
+      return toast.error("password must be same")
+    }
 
-       signupMutation(newSignUPData)
-     
+    const { confirmPassword, ...newSignUPData } = signupData;
+
+    signupMutation(newSignUPData)
+
 
 
   }
@@ -46,12 +60,30 @@ const SignUpPage = () => {
         </h1>
 
       </motion.div>
+
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         className=" bg-toupe  text-white bg-opacity-35 max-w-md w-full shadow-lg rounded-sm mx-auto  backdrop-blur-xl overflow-hidden"
       >
+      <div className='flex justify-center m-6 '>
+        <GoogleLogin
+          onSuccess={credentialResponse => {
+
+            handleGoogleLogin(credentialResponse);
+          }}
+          onError={() => {
+            console.log('Login Failed');
+          }}
+        />
+      </div>
+      <div className='flex justify-center items-center'>
+        <span className='border-t border-gray-300 flex-1 mx-4'/>
+        <span>OR</span>
+        <span className='border-t border-gray-300 flex-1 mx-4'/>
+      </div>
         <div className='p-6'>
 
           <form onSubmit={(e) => handleSubmit(e)} className='space-y-5'>
@@ -115,14 +147,14 @@ const SignUpPage = () => {
                 onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
               />
             </div>
-                {error && (
-                  
-                  <p className="bg-red-700 text-white-500 mt-2 p-2 rounded-lg">
-                    {" "}
-                    {error.response?.data?.message || error.message}
-                  </p>
-                )}
-               
+            {error && (
+
+              <p className="bg-red-700 text-white-500 mt-2 p-2 rounded-lg">
+                {" "}
+                {error.response?.data?.message || error.message}
+              </p>
+            )}
+
 
             <motion.button className='w-full bg-toupe p-3 text-xl font-bold  outline-none rounded-md hover:bg-pupkin_spice focus:outline-none focus:ring-2 focus:ring-toupe focus:ring-opacity-35 tansition duration-700 '
               type='submit'
