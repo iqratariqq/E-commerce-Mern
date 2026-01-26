@@ -45,7 +45,7 @@ export const getPendingVendors = async (req, res) => {
         .status(404)
         .json({ success: false, message: "no pending vendors found" });
     }
-    res.status(200).json({ success: true, pendingVendors });
+    res.status(200).json({ success: true, pendingVendors })
   } catch (error) {
     console.error("error in getPendingVendors controller", error)
     return res

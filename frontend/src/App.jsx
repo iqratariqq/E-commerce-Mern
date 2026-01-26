@@ -8,6 +8,7 @@ import useAuthuser from "./hooks/useAuth.js";
 import Loader from "./Components/Loader.jsx"
 import CartPage from "./Pages/CartPage.jsx";
 import { Toaster } from "react-hot-toast";
+import AdminPage from "./Pages/AdminPage.jsx";
 
 function App() {
 
@@ -59,6 +60,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout>
             <HomePage />
+    
           </Layout>} />
           <Route path="/login" element={
             <RedirectAuthenticatedUser>
@@ -73,6 +75,9 @@ function App() {
             </RedirectAuthenticatedUser>
 
           } />
+
+          <Route path="/admin" element={<AdminPage />}
+          />
 
           <Route path="/cart" element={
             <ProtectRoute>
