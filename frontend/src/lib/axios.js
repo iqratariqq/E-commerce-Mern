@@ -24,7 +24,6 @@ axiosInstance.interceptors.response.use(
           await refreshPromise;
         } else {
           refreshPromise = refreshToken();
-
           await refreshPromise;
           refreshPromise = null;
         }
