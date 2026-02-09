@@ -1,14 +1,17 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy,Suspense } from "react";
+const HomePage=lazy(()=>import("./pages/HomePage.jsx"))
 
-import HomePage from "./pages/HomePage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import SignUpPage from "./pages/SignUpPage.jsx";
+const LoginPage =lazy(()=>import("./pages/LoginPage.jsx"))
+const SignUpPage =lazy(()=>import("./pages/SignUpPage.jsx")) ;
 import Layout from "./Components/Layout.jsx";
 import useAuthuser from "./hooks/useAuth.js";
 import Loader from "./Components/Loader.jsx"
 import CartPage from "./Pages/CartPage.jsx";
 import { Toaster } from "react-hot-toast";
 import AdminPage from "./Pages/AdminPage.jsx";
+import RegisterKitchen from "./Pages/RegisterKitchen.jsx";
+
 
 function App() {
 
@@ -16,15 +19,19 @@ function App() {
   const isAuthenticated = !!authUser
 
 
-
+console.log("authUser in App.jsx:", authUser)
   if (isLoading) return <Loader />
 
 
   function RedirectAuthenticatedUser({ children }) {
 
-    if (isAuthenticated) {
+    if (isAuthenticated && authUser?.user?.role==="Customer") {
 
       return <Navigate to="/" replace />
+    }
+    
+    if (isAuthenticated && authUser?.user?.role==="vendor") {
+      return <Navigate to="/vendor/register-kitchen" replace />
     }
 
     return children
@@ -78,6 +85,8 @@ function App() {
 
           <Route path="/admin" element={<AdminPage />}
           />
+
+          <Route path="vendor/register-kitchen" element={<RegisterKitchen />} />
 
           <Route path="/cart" element={
             <ProtectRoute>

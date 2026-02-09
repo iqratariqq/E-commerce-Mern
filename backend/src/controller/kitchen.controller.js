@@ -63,11 +63,13 @@ export const getAllKitchen = async (req, res) => {
 };
 
 export const registerKitchen = async (req, res) => {
+  let cloudinaryResponse = null;
   try {
     const { kitchenName, kitchenAddress, category } = req.body;
 
     const kitchenOwner = req.user._id;
-    let cloudinaryResponse = null;
+    console.log("kitchenOwner", kitchenOwner)
+    
     const owner = await User.findById(kitchenOwner);
     if (!owner || owner.role !== "vendor") {
       return res
@@ -76,13 +78,15 @@ export const registerKitchen = async (req, res) => {
     }
 
     //upload kitchen image to cloudinary
+    console.log("in register kitchen",req.body)
+
     try {
       cloudinaryResponse = await uploadImage(req.file.path, "kitchenImages");
     } catch (error) {
       if (req.file && req.file.path) {
         fs.unlink(req.file.path, (err) => {
           if (err) {
-            console.error("Error deleting file after upload failure:", err);
+            console.error("Error deleting file after upload failure:", err)
           }
         });
       }
@@ -101,6 +105,7 @@ export const registerKitchen = async (req, res) => {
       kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " ",
     });
 
+    console.log("newKitchen", newKitchen);
     //save kitchen to db
 
     await newKitchen.save();
@@ -113,7 +118,7 @@ export const registerKitchen = async (req, res) => {
   } catch (error) {
     console.error("error in registering kitchen", error);
     if (cloudinaryResponse?.public_id) {
-      await cloudinary.uploader.destroy(cloudinaryResponse.public_id);
+      await cloudinary.uploader.destroy(cloudinaryResponse?.public_id);
     }
     return res.status(500).json({
       success: false,
@@ -189,7 +194,7 @@ export const updateKitchen = async (req, res) => {
     console.log("req.body in updateKitchen", req.body);
     const { id: kitchenId } = req.params;
 
-    const existingKitchen = await Kitchen.findById(kitchenId);
+    const existingKitchen = await Kitchen.findById(kitchenId)
     if (!existingKitchen) {
       return res
         .status(404)

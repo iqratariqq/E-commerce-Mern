@@ -1,10 +1,12 @@
 import axiosInstance from "../lib/axios";
 import { refreshAxios } from "../lib/refreshAxios";
 
-export const signUp = async (userData) => {
+export const signUp = async ({userData,role}) => {
   try {
+    console.log("role in api",role)
+    console.log("userData in api",userData)
     const res = await axiosInstance.post(
-      `/auth/signup/${"customer"}`,
+      `/auth/signup/${role}`,
       userData
     );
     return res.data;

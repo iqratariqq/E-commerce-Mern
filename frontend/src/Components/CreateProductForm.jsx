@@ -30,9 +30,9 @@ const CreateProductForm = () => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="flex flex-col w-full  max-w-2xl    bg-toupe bg-opacity-30 mx-auto  rounded-sm gap-2  mt-3 lg:mt-5"
+      className="flex flex-col w-full  max-w-2xl   bg-toupe bg-opacity-30 mx-auto  rounded-sm gap-2  mt-3 lg:mt-5"
     >
-      <h1 className="p-2 text-center  text-xl font-medium text-toupe">Add Product</h1>
+      <h1 className="pt-2 text-center  text-xl font-medium text-toupe">Add Product</h1>
       <div className="p-4">
         <form
           onSubmit={(e) => handleSubmit(e)}
@@ -103,19 +103,27 @@ const CreateProductForm = () => {
           </div>
 
           <div className="my-7">
-            <input type="file" id="image" accept="image/*" className="sr-only" 
-            onChange={(e)=>setProduct({...product,imageURL:URL.createObjectURL(e.target.files[0])})}
+            <input type="file" id="image" accept="image/*" className="sr-only"
+              onChange={(e) => setProduct({ ...product, imageURL: URL.createObjectURL(e.target.files[0]) })}
             />
-            
+
             <label htmlFor="image" className=" cursor-pointer bg-toupe bg-opacity-90 hover:bg-pupkin_spice transition duration-700 p-4 focus:ring-2 rounded-md focus:ring-pupkin_spice border-gray-700">
               <Upload className="size-5 inline-block mr-2" />
 
               Upload image</label>
-              {product.imageURL && (
-                <div className="mt-4">
-                  <img src={product.imageURL} alt="Product" className="size-20 object-cover rounded-md" />
-                </div>
-              ) }
+            {product.imageURL && (
+              <div className="mt-4">
+                <img src={product.imageURL} alt="Product" className="size-20 object-cover rounded-md" />
+              </div>
+            )}
+          </div>
+          <div>
+            <motion.button type="submit" className="w-full bg-pupkin_spice p-2 rounded-md text-xl hover:bg-toupe hover:text-pupkin_spice transition"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Submit
+            </motion.button>
           </div>
 
         </form>

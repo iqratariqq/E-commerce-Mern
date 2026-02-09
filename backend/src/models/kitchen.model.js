@@ -29,7 +29,7 @@ const kitchenSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["vegetarian","non-vegetarian","vegan","continental","chinese","italian","fast-food","desserts","bakery","desi"],
+    
       default: "continental"
     },
 

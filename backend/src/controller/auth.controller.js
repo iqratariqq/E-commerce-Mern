@@ -12,15 +12,15 @@ import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 import { redis } from "../Utils/redis.js";
 
-
 // register controller
 
 export const signup = async (req, res) => {
-  const{role}=req.params
+  const { role } = req.params;
+
   const { userName, email, password } = req.body;
-  console.log(req.body)
+
   try {
-    if (!userName || !email || !password ) {
+    if (!userName || !email || !password) {
       return res.status(400).json({ message: "all fields are required" });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,22 +34,24 @@ export const signup = async (req, res) => {
     if (alreadyExit) {
       return res
         .status(409)
-        .json({ success: false, message: "user already exist,try another email" });
+        .json({
+          success: false,
+          message: "user already exist,try another email",
+        });
     }
     const hashPassword = await bcryptjs.hash(password, 10);
     const user = new User({
       userName,
       email,
       password: hashPassword,
-      role:role === "vendor" ? "vendor" : "customer",
+      role: role === "vendor" ? "vendor" : "customer",
       requestStatus: role === "vendor" ? "pending" : "active",
-
     });
     await user.save();
 
     const refreshToken = refreshTokenGenerate(user._id);
     const accessToken = generateAccessToken(user._id);
-    await storeRefreshTokeninRedis(refreshToken);
+    await storeRefreshTokeninRedis(user._id, refreshToken);
     setRefreshCookies(res, refreshToken);
     setAccessCookies(res, accessToken);
 
@@ -71,8 +73,6 @@ export const signup = async (req, res) => {
   }
 };
 
-
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -87,7 +87,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ succuss: false, message: "invalid email" });
     }
 
-    const userhashPassword =await bcryptjs.compare(password, user.password);
+    const userhashPassword = await bcryptjs.compare(password, user.password);
     if (!userhashPassword) {
       {
         return res
@@ -95,8 +95,13 @@ export const login = async (req, res) => {
           .json({ succuss: false, message: "invalid password" });
       }
     }
-    if(user.requestStatus!=="active"){
-      return res.status(403).json({success:false,message:"your account is not active, please contact to admin"})
+    if (user.requestStatus !== "active") {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "your account is not active, please contact to admin",
+        });
     }
 
     const refreshToken = refreshTokenGenerate(user._id);
@@ -124,7 +129,7 @@ export const logout = async (req, res) => {
     }
     const decode = jwt.verify(
       refreshToken,
-      process.env.REFRESH_TOKEN_SECRET_KEY
+      process.env.REFRESH_TOKEN_SECRET_KEY,
     );
     if (!decode || !decode.userID) {
       return res
@@ -150,25 +155,33 @@ export const logout = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+    console.log("refresh token from cookie", refreshToken);
     if (!refreshToken) {
-      return res.status(401).json({ success:false,message: "no refresh token" });
+      return res
+        .status(401)
+        .json({ success: false, message: "no refresh token" });
     }
 
     const decode = jwt.verify(
       refreshToken,
-      process.env.REFRESH_TOKEN_SECRET_KEY
+      process.env.REFRESH_TOKEN_SECRET_KEY,
     );
- 
+
     if (!decode || !decode.userID) {
       return res
         .status(401)
-        .json({success:false, message: "unauthorized, invalid refresh token" });
+        .json({
+          success: false,
+          message: "unauthorized, invalid refresh token",
+        });
     }
     const storedRefreshToken = await redis.get(`refreshToken:${decode.userID}`);
+    console.log("stored refresh token from redis", storedRefreshToken);
+    console.log("refresh token from cookie", refreshToken);
 
     if (storedRefreshToken !== refreshToken) {
       return res.status(401).json({
-        success:false,
+        success: false,
         message:
           "unauthorized, invalid refresh token,token not match with redis token",
       });
@@ -187,4 +200,3 @@ export const refreshToken = async (req, res) => {
     });
   }
 };
-

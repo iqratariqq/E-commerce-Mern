@@ -7,10 +7,11 @@ import { Link } from "react-router-dom"
 import { useSignup } from '../hooks/useSignup'
 import toast from 'react-hot-toast'
 import { GoogleLogin } from '@react-oauth/google';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const SignUpPage = () => {
 
+  const [role, setRole] = useState("customer");
 
 
 
@@ -25,7 +26,7 @@ const SignUpPage = () => {
     }
   )
 
-  const handleGoogleLogin=(credentialResponse)=>{
+  const handleGoogleLogin = (credentialResponse) => {
     const decoded = jwtDecode(credentialResponse.credential);
     const googleUserData = {
       userName: decoded.name,
@@ -44,14 +45,17 @@ const SignUpPage = () => {
     }
 
     const { confirmPassword, ...newSignUPData } = signupData;
+    
 
-    signupMutation(newSignUPData)
+
+    signupMutation({userData:newSignUPData,role})
 
 
 
   }
+
   return (
-    <div className='lg:py-16 min-h-screen flex justify-center items-center  flex-col border  border-red-700 overflow-y-hidden lg:block'>
+    <div className='lg:py-5 min-h-screen flex justify-center items-center  flex-col border  border-red-700 overflow-y-hidden lg:block'>
       <motion.div initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}>
@@ -61,29 +65,42 @@ const SignUpPage = () => {
 
       </motion.div>
 
-      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         className=" bg-toupe  text-white bg-opacity-35 max-w-md w-full shadow-lg rounded-sm mx-auto  backdrop-blur-xl overflow-hidden"
       >
-      <div className='flex justify-center m-6 '>
-        <GoogleLogin
-          onSuccess={credentialResponse => {
+        <div className='grid grid-cols-2'>
+          <button onClick={() => setRole("customer")} className={`${role === "customer" ? "bg-pupkin_spice/75 text-white " : "bg-toupe bg-opacity-70"} text-lg font-medium p-2 hover:bg-toupe hover:bg-opacity-30 text-pupkin_spice `}>Customer</button>
+          <button onClick={() => setRole("vendor")} className=
 
-            handleGoogleLogin(credentialResponse);
-          }}
-          onError={() => {
-            console.log('Login Failed');
-          }}
-        />
-      </div>
-      <div className='flex justify-center items-center'>
-        <span className='border-t border-gray-300 flex-1 mx-4'/>
-        <span>OR</span>
-        <span className='border-t border-gray-300 flex-1 mx-4'/>
-      </div>
+            {`${role === "vendor" ? "bg-pupkin_spice/75 text-white" : "bg-toupe bg-opacity-70"} text-lg font-medium p-2 hover:bg-toupe hover:bg-opacity-30 text-pupkin_spice`}>Vendor</button>
+
+
+        </div>
+        {role === "customer" &&
+          <>
+
+            <div className=' flex  justify-center my-4 w-full'>
+              <GoogleLogin
+                onSuccess={credentialResponse => {
+
+                  handleGoogleLogin(credentialResponse);
+                }}
+                onError={() => {
+                  console.log('Login Failed');
+                }}
+              />
+            </div>
+
+            <div className='flex justify-center items-center'>
+              <span className='border-t border-gray-300 flex-1 mx-4' />
+              <span>OR</span>
+              <span className='border-t border-gray-300 flex-1 mx-4' />
+            </div>
+          </>
+        }
         <div className='p-6'>
 
           <form onSubmit={(e) => handleSubmit(e)} className='space-y-5'>
