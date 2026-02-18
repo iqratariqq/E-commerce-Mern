@@ -155,7 +155,7 @@ export const logout = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    console.log("refresh token from cookie", refreshToken);
+ 
     if (!refreshToken) {
       return res
         .status(401)
@@ -176,8 +176,7 @@ export const refreshToken = async (req, res) => {
         });
     }
     const storedRefreshToken = await redis.get(`refreshToken:${decode.userID}`);
-    console.log("stored refresh token from redis", storedRefreshToken);
-    console.log("refresh token from cookie", refreshToken);
+  
 
     if (storedRefreshToken !== refreshToken) {
       return res.status(401).json({

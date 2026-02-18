@@ -68,7 +68,7 @@ export const registerKitchen = async (req, res) => {
     const { kitchenName, kitchenAddress, category } = req.body;
 
     const kitchenOwner = req.user._id;
-    console.log("kitchenOwner", kitchenOwner)
+   
     
     const owner = await User.findById(kitchenOwner);
     if (!owner || owner.role !== "vendor") {
@@ -77,8 +77,7 @@ export const registerKitchen = async (req, res) => {
         .json({ success: false, message: "only vendor can register kitchen" });
     }
 
-    //upload kitchen image to cloudinary
-    console.log("in register kitchen",req.body)
+   
 
     try {
       cloudinaryResponse = await uploadImage(req.file.path, "kitchenImages");
@@ -105,7 +104,7 @@ export const registerKitchen = async (req, res) => {
       kitchenImageURL: cloudinaryResponse ? cloudinaryResponse.secure_url : " ",
     });
 
-    console.log("newKitchen", newKitchen);
+  
     //save kitchen to db
 
     await newKitchen.save();
@@ -191,7 +190,7 @@ export const updateKitchenStatus = async (req, res) => {
 
 export const updateKitchen = async (req, res) => {
   try {
-    console.log("req.body in updateKitchen", req.body);
+   
     const { id: kitchenId } = req.params;
 
     const existingKitchen = await Kitchen.findById(kitchenId)

@@ -5,7 +5,7 @@ import { generateAccessToken, refreshTokenGenerate, setAccessCookies, setRefresh
 export const updateVendorStatus = async (req, res) => {
   try {
     const { id:vendorId } = req.params;
-    console.log("vendorId:", vendorId);
+   
     const { status } = req.body;
     const vendor = await User.findById(vendorId);
     if (!vendor || vendor.role !== "vendor") {

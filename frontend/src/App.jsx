@@ -21,6 +21,7 @@ function App() {
 
 console.log("authUser in App.jsx:", authUser)
   if (isLoading) return <Loader />
+  console.log("authUser?.user?.role",authUser?.user?.role)
 
 
   function RedirectAuthenticatedUser({ children }) {

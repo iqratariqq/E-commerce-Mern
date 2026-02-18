@@ -7,7 +7,7 @@ export const protectRoute = async (req, res, next) => {
   try {
 
     const accesssToken = req.cookies.accessToken;
-    console.log("access token from cookie", accesssToken);
+   
     if (!accesssToken) {
       return res.status(401).json({success:false, message: "No access token found" });
     }
@@ -31,7 +31,6 @@ export const protectRoute = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log("in req.user",req.user)
     next();
   } catch (error) {
     console.error("error in protect route middleware", error);

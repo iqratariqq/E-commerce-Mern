@@ -29,7 +29,6 @@ const kitchenSchema = new mongoose.Schema(
 
     category: {
       type: String,
-    
       default: "continental"
     },
 
