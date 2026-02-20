@@ -3,10 +3,11 @@ import { redis } from "../Utils/redis.js";
 import cloudinary, { uploadImage } from "../Utils/cloudniray.js";
 import kitchen from "../models/kitchen.model.js";
 import fs from "fs";
+import { getVendorKitchenId } from "./kitchen.controller.js";
 
 export const getKitchenMenu = async (req, res) => {
   try {
-    const { id:kitchenId } = req.params;
+   const kitchenId= await getVendorKitchenId(req.user._id)
     if (!kitchenId) {
       return res
         .status(400)
@@ -61,7 +62,8 @@ export const getFeaturedMenu = async (req, res) => {
 };
 
 export const addMenu = async (req, res) => {
-  const kitchenId = req.params.id;
+  const kitchenId = await getVendorKitchenId(req.user._id)
+  console.log("kitchenId in addMenu controller", kitchenId)
 
   const { name, price, description, category, available } = req.body;
   let cloudinaryResponse = null;
@@ -83,6 +85,7 @@ export const addMenu = async (req, res) => {
     try {
       cloudinaryResponse = await uploadImage(req.file.path, "Menu");
     } catch (error) {
+      if (req.file && req.file.path) {
       fs.unlink(req.file.path, (err) => {
         if (err) {
           console.error(
@@ -90,7 +93,7 @@ export const addMenu = async (req, res) => {
             err
           );
         }
-      });
+      })};
     }
 
     const menu = new Menu({
@@ -124,7 +127,7 @@ export const addMenu = async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
       error: error.message,
     });
   }

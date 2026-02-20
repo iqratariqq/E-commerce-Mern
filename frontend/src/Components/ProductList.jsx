@@ -1,7 +1,16 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Trash, Star } from "lucide-react"
+import { useQuery } from '@tanstack/react-query'
+import { getProducts } from '../api/productApi'
 const ProductList = () => {
+
+  const {data,isLoading}=useQuery({
+    queryKey:["products"],
+    queryFn:getProducts,
+    
+  })
+  const products=data?.Menus||[]
   const users = [
     {
       id: 1,
@@ -87,18 +96,18 @@ const ProductList = () => {
           </thead>
           <tbody className='bg-toupe/50 divide-y divide-khakhi_beige '>
 
-            {users.map((user) => (
+            {products.map((product) => (
               <tr className='hover:bg-toupe/60'>
                 <td
                 scope='col'
-                 className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'>{user.name}</td>
+                 className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'>{product.name}</td>
                 <td
                  scope='col'
-                className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'><div>100</div></td>
+                className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'><div>{product.price}</div></td>
                 <td
                  scope='col'
-                 className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'><div>{user.role}</div></td>
-                <td className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'>{user.role}</td>
+                 className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'><div>{product.category}</div></td>
+                <td className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'>{product.available ? "Yes" : "No"}</td>
                 <td 
                  scope='col'
                 className='px-6 lg:px-14 py-3 text-left text-sm font-medium text-gray-100 whitespace-nowrap'><motion.button

@@ -287,3 +287,22 @@ export const getFeaturedKitchens = async (req, res) => {
     });
   }
 };
+
+
+export const getVendorKitchenId=async(kitechenOwner)=>{
+  try {
+
+     const kitchenId=await Kitchen.findOne({kitchenOwner:kitechenOwner}).select("_id")
+     console.log("kitchenId in getVendorKitchenId function", kitchenId)
+    if(!kitchenId){
+      throw new Error("kitchen not found for this vendor")
+    }
+    return kitchenId._id
+
+    
+  } catch (error) {
+     console.log("error in get vendor kitchen id", error.message);
+    throw new Error(error.message);
+  }
+
+}

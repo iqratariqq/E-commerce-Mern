@@ -41,7 +41,6 @@ export const protectRoute = async (req, res, next) => {
 //checking for admin role
 export const isVendor = (req, res, next) => {
     try {
-console.log("user in isVendor middleware",req.user)
         if (req.user?.role === "vendor" || req.user?.requestStatus==="active" ) {
             return next();
         }

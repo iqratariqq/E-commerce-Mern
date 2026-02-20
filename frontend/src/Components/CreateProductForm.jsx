@@ -2,14 +2,12 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Input from "./Input"
 import { Upload } from "lucide-react"
+import { useMutation } from "@tanstack/react-query"
+import { addProduct } from "../api/productApi"
+import toast from "react-hot-toast"
 
 const categories = [
-  "Desi",
-  "Fast Food",
-  "Chinese",
-  "Italian",
-  "BBQ",
-  "Beverages",
+"Lunch", "Dinner", "Breakfast", "Snacks", "Beverages"
 ]
 
 const CreateProductForm = () => {
@@ -18,11 +16,36 @@ const CreateProductForm = () => {
     price: "",
     description: "",
     category: "",
-    imageURL: "",
+    imageURL: null,
   })
+
+
+
+  const {mutate:addProductMutation,isPending}=useMutation(
+    {
+      mutationFn:addProduct,
+      mutationKey:["addProduct"],
+      onSuccess:()=>{
+        toast.success("Product added successfully")
+      },
+      onError:(err)=>{
+        toast.error(err.response?.data?.message || err.message)
+      }
+
+
+    }
+  )
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    const formData = new FormData();
+    formData.append("name", product.name);
+    formData.append("price", product.price);
+    formData.append("description", product.description);
+    formData.append("category", product.category);
+    formData.append("productImage", product.imageURL);
+    addProductMutation(formData)
+
 
   }
   return (
@@ -104,7 +127,7 @@ const CreateProductForm = () => {
 
           <div className="my-7">
             <input type="file" id="image" accept="image/*" className="sr-only"
-              onChange={(e) => setProduct({ ...product, imageURL: URL.createObjectURL(e.target.files[0]) })}
+              onChange={(e) => setProduct({ ...product, imageURL:e.target.files[0] })}
             />
 
             <label htmlFor="image" className=" cursor-pointer bg-toupe bg-opacity-90 hover:bg-pupkin_spice transition duration-700 p-4 focus:ring-2 rounded-md focus:ring-pupkin_spice border-gray-700">
@@ -113,7 +136,7 @@ const CreateProductForm = () => {
               Upload image</label>
             {product.imageURL && (
               <div className="mt-4">
-                <img src={product.imageURL} alt="Product" className="size-20 object-cover rounded-md" />
+                <img src={ URL.createObjectURL(product.imageURL)} alt="Product" className="size-20 object-cover rounded-md" />
               </div>
             )}
           </div>
@@ -121,8 +144,10 @@ const CreateProductForm = () => {
             <motion.button type="submit" className="w-full bg-pupkin_spice p-2 rounded-md text-xl hover:bg-toupe hover:text-pupkin_spice transition"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
+              disabled={isPending}
             >
-              Submit
+              {isPending?"Loading...":"Add Product"}
+            
             </motion.button>
           </div>
 

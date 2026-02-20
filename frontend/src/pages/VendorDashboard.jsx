@@ -10,7 +10,7 @@ const tabs = [
   { id: "products", label: "Products List", icon: ShoppingBasket },
   { id: "analytics", label: "Analytics", icon: BarChart },
 ]
-const AdminPage = () => {
+const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState("create");
   return (
     <div className="min-h-screen flex flex-col items-center  lg:pt-7 pt-5 ">
@@ -19,7 +19,7 @@ const AdminPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="font-bold text-3xl lg:text-4xl text-toupe">Admin Dashboard</motion.h1>
+          className="font-bold text-3xl lg:text-4xl text-toupe">Vendor Dashboard</motion.h1>
       </div>
 
       <div className='w-full  sm:max-w-2xl  lg:max-w-5xl  bg-toupe bg-opacity-30 mx-auto flex justify-center rounded-sm gap-2 sm:gap-10 lg:gap-x-32 '>
@@ -44,4 +44,4 @@ const AdminPage = () => {
   )
 }
 
-export default AdminPage
+export default VendorDashboard

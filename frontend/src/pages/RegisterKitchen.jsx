@@ -5,6 +5,7 @@ import Input from '../Components/Input'
 import { useMutation } from '@tanstack/react-query'
 import { registerKitchen } from '../api/kitchenApi'
 import toast from 'react-hot-toast'
+import { Navigate } from 'react-router-dom'
 
 const RegisterKitchen = () => {
   const { mutate: registerKitchenMutation, isPending } = useMutation({
@@ -12,12 +13,13 @@ const RegisterKitchen = () => {
     mutationKey: ["registerKitchen"],
     onSuccess: () => {
       toast.success("register Kitchen successfully")
+      return <Navigate to="/vendor/dashboard" replace />
+      
 
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || err.message)
     }
-
   })
 
   const categories = [
@@ -37,7 +39,7 @@ const RegisterKitchen = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(kitchenData)
+
     const formData = new FormData();
     formData.append("kitchenName", kitchenData.kitchenName);
     formData.append("kitchenAddress", kitchenData.kitchenAddress);
