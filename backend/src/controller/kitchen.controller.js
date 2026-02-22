@@ -293,7 +293,6 @@ export const getVendorKitchenId=async(kitechenOwner)=>{
   try {
 
      const kitchenId=await Kitchen.findOne({kitchenOwner:kitechenOwner}).select("_id")
-     console.log("kitchenId in getVendorKitchenId function", kitchenId)
     if(!kitchenId){
       throw new Error("kitchen not found for this vendor")
     }

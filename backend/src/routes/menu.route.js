@@ -1,7 +1,6 @@
 import express from "express";
 import {
-  isAdmin,
-  isVendor,
+    isVendor,
   protectRoute,
 } from "../middelware/auth.middelware.js";
 import {
@@ -31,6 +30,7 @@ router.post(
   upload.single("productImage"),
   addMenu
 );
+
 router.put("/:id", protectRoute, isVendor, updateMenu);
 router.patch("/:id", protectRoute, isVendor, toggleFeaturedMenu);
 router.delete("/:id", protectRoute, isVendor, deleteMenu);

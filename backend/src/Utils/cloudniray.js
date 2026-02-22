@@ -28,3 +28,13 @@ export const uploadImage = async (localImagePath, folderName) => {
 };
 
 export default cloudinary;
+
+export const extractPublicId = (imageURL) => {
+  const urlParts = imageURL.split("/");
+  const folder = urlParts[urlParts.length - 2];
+  const fileNameWithExt = urlParts[urlParts.length - 1];
+  const fileName = fileNameWithExt.split(".")[0];
+
+  const publicId = `${folder}/${fileName}`;
+  return publicId;
+};

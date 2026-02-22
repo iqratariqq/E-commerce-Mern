@@ -1,11 +1,20 @@
-import axios from "axios"
+import axiosInstance from "../lib/axios"
 
 export const addProduct=async(productData)=>{
-    const product=await axios.post(`/api/menu/`,productData)
+    const product=await axiosInstance.post(`/menu`,productData)
+    console.log("product in api", product)
     return product
 }
 
 export const getProducts=async()=>{
-    const products=await axios.get(`/api/menu/`)
-    return products
+    console.log("fetching products in api")
+    const products=await axiosInstance.get(`/menu`)
+    return products.data
 }
+
+export const deleteProduct=async(productId)=>{
+    console.log("deleting product with id in api", productId)
+    const response=await axiosInstance.delete(`/menu/${productId}`)
+    console.log("delete response", response)
+    return response
+} 

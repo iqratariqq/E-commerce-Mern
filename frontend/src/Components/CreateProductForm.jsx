@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Input from "./Input"
 import { Upload } from "lucide-react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { addProduct } from "../api/productApi"
 import toast from "react-hot-toast"
 
@@ -20,12 +20,15 @@ const CreateProductForm = () => {
   })
 
 
-
+  const queryClient = useQueryClient()
   const {mutate:addProductMutation,isPending}=useMutation(
     {
       mutationFn:addProduct,
       mutationKey:["addProduct"],
       onSuccess:()=>{
+        console.log("invalidating getProducts query")
+         queryClient.invalidateQueries({ queryKey: ["getProducts"] });
+         
         toast.success("Product added successfully")
       },
       onError:(err)=>{
@@ -145,6 +148,7 @@ const CreateProductForm = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               disabled={isPending}
+                     style={isPending ? { opacity: 0.5, cursor: "not-allowed" } : {}}
             >
               {isPending?"Loading...":"Add Product"}
             
