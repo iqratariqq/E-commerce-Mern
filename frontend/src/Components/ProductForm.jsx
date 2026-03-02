@@ -3,41 +3,56 @@ import { motion } from "framer-motion"
 import Input from "./Input"
 import { Upload } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { addProduct } from "../api/productApi"
+import { addProduct, updateProduct } from "../api/productApi"
 import toast from "react-hot-toast"
 
 const categories = [
-"Lunch", "Dinner", "Breakfast", "Snacks", "Beverages"
+  "Lunch", "Dinner", "Breakfast", "Snacks", "Beverages"
 ]
 
-const CreateProductForm = () => {
+const ProductForm = ({ mode = "create",productId, previousData }) => {
   const [product, setProduct] = useState({
-    name: "",
-    price: "",
-    description: "",
-    category: "",
-    imageURL: null,
+    name: previousData?.name || "",
+    price: previousData?.price || "",
+    description: previousData?.description || "",
+    category: previousData?.category || "",
+    imageURL: previousData?.imageURL || null,
   })
 
 
   const queryClient = useQueryClient()
-  const {mutate:addProductMutation,isPending}=useMutation(
+  const { mutate: addProductMutation, isPending } = useMutation(
     {
-      mutationFn:addProduct,
-      mutationKey:["addProduct"],
-      onSuccess:()=>{
+      mutationFn: addProduct,
+      mutationKey: ["addProduct"],
+      onSuccess: () => {
         console.log("invalidating getProducts query")
-         queryClient.invalidateQueries({ queryKey: ["getProducts"] });
-         
+        queryClient.invalidateQueries({ queryKey: ["getProducts"] });
+
         toast.success("Product added successfully")
       },
-      onError:(err)=>{
+      onError: (err) => {
         toast.error(err.response?.data?.message || err.message)
       }
-
-
     }
   )
+
+  const { mutate: updateProductMutation, isPending: isUpdationPending } = useMutation(
+    {
+      mutationFn: updateProduct,
+      mutationKey: ["updateProduct"],
+      onSuccess: () => {
+        console.log("invalidating getProducts query")
+        queryClient.invalidateQueries({ queryKey: ["getProducts"] });
+
+        toast.success("Product updated successfully")
+      },
+      onError: (err) => {
+        toast.error(err.response?.data?.message || err.message)
+      }
+    }
+  )
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -47,7 +62,16 @@ const CreateProductForm = () => {
     formData.append("description", product.description);
     formData.append("category", product.category);
     formData.append("productImage", product.imageURL);
-    addProductMutation(formData)
+    if (mode === "create") {
+      console.log("submitting add product form with data", formData)
+      addProductMutation(formData)
+    }
+    else if (mode === "edit") {
+      console.log("product", product)
+      console.log("submitting update with data", formData)
+      updateProductMutation({ productId: productId, updatedData: formData })
+    }
+
 
 
   }
@@ -58,7 +82,7 @@ const CreateProductForm = () => {
       transition={{ duration: 0.7 }}
       className="flex flex-col w-full  max-w-2xl   bg-toupe bg-opacity-30 mx-auto  rounded-sm gap-2  mt-3 lg:mt-5"
     >
-      <h1 className="pt-2 text-center  text-xl font-medium text-toupe">Add Product</h1>
+      <h1 className="pt-2 text-center  text-xl font-medium text-toupe">{mode === "create" ? "Add Product" : "Update Product"}</h1>
       <div className="p-4">
         <form
           onSubmit={(e) => handleSubmit(e)}
@@ -130,7 +154,7 @@ const CreateProductForm = () => {
 
           <div className="my-7">
             <input type="file" id="image" accept="image/*" className="sr-only"
-              onChange={(e) => setProduct({ ...product, imageURL:e.target.files[0] })}
+              onChange={(e) => setProduct({ ...product, imageURL: e.target.files[0] })}
             />
 
             <label htmlFor="image" className=" cursor-pointer bg-toupe bg-opacity-90 hover:bg-pupkin_spice transition duration-700 p-4 focus:ring-2 rounded-md focus:ring-pupkin_spice border-gray-700">
@@ -139,7 +163,9 @@ const CreateProductForm = () => {
               Upload image</label>
             {product.imageURL && (
               <div className="mt-4">
-                <img src={ URL.createObjectURL(product.imageURL)} alt="Product" className="size-20 object-cover rounded-md" />
+                <img src={product.imageURL instanceof File
+                  ? URL.createObjectURL(product.imageURL)
+                  : product.imageURL} alt="Product" className="size-20 object-cover rounded-md" />
               </div>
             )}
           </div>
@@ -148,13 +174,11 @@ const CreateProductForm = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               disabled={isPending}
-                     style={isPending ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+              style={isPending ? { opacity: 0.5, cursor: "not-allowed" } : {}}
             >
-              {isPending?"Loading...":"Add Product"}
-            
+              {isPending || isUpdationPending ? "Loading..." : <>{mode === "create" ? "Add Product" : "Update Product"}</>}
             </motion.button>
           </div>
-
         </form>
 
       </div>
@@ -164,4 +188,4 @@ const CreateProductForm = () => {
   )
 }
 
-export default CreateProductForm
+export default ProductForm

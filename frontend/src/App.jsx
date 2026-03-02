@@ -22,7 +22,7 @@ function App() {
   console.log("authUser in App.jsx:", authUser)
   if (isLoading) return <Loader />
   console.log("authUser?.user?.role", authUser?.user?.role)
-  console.log("authuser?.requestStatue",authUser?.user?.requestStatus)
+  console.log("authuser?.requestStatue", authUser?.user?.requestStatus)
 
 
   function RedirectAuthenticatedUser({ children }) {
@@ -36,7 +36,7 @@ function App() {
       return <Navigate to="/vendor/register-kitchen" replace />
     }
     if (isAuthenticated && authUser?.user?.role === "vendor" && authUser?.user?.requestStatus === "active") {
-      
+
       return <Navigate to="/vendor/vendor-dashboard" replace />
     }
 
@@ -72,13 +72,13 @@ function App() {
       <div className="relative z-50 " >
         <Routes>
           <Route path="/" element={
-<RedirectAuthenticatedUser>
+            <RedirectAuthenticatedUser>
 
-            <Layout>
-            <HomePage />
-          </Layout>
-</RedirectAuthenticatedUser>
-        } />
+              <Layout>
+                <HomePage />
+              </Layout>
+            </RedirectAuthenticatedUser>
+          } />
           <Route path="/login" element={
             <RedirectAuthenticatedUser>
               <LoginPage />

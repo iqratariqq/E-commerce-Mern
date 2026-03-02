@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { BarChart, PlusCircle, ShoppingBasket } from 'lucide-react';
 import { useState } from 'react';
-import CreateProductForm from '../Components/CreateProductForm';
+import CreateProductForm from '../Components/ProductForm';
 import ProductList from '../Components/ProductList';
 import Analytics from '../Components/Analytics';
 

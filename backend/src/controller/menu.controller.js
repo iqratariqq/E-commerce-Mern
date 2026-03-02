@@ -21,7 +21,7 @@ export const getKitchenMenu = async (req, res) => {
       .findById(kitchenId)
       .populate(
         "menuItems",
-        "name price description category imageURL available",
+        "name price description category imageURL available isFeatured",
       );
     if (!kitchenMenu) {
       return res.status(404).json({ success: false, message: "No Menu found" });
@@ -146,6 +146,7 @@ export const addMenu = async (req, res) => {
 export const updateMenu = async (req, res) => {
   try {
     const { id: menuId } = req.params;
+    console.log(req.body, "body of update menu controller");
     const { name, price, description, available, category } = req.body;
     let cloudinaryResponse = null;
 
@@ -166,12 +167,7 @@ export const updateMenu = async (req, res) => {
 
     //if image is updated delete old image from cloudinary
     if (req.file) {
-      const urlParts = menu.imageURL.split("/");
-      const folder = urlParts[urlParts.length - 2];
-      const fileNameWithExt = urlParts[urlParts.length - 1];
-      const fileName = fileNameWithExt.split(".")[0];
-
-      const publicId = `${folder}/${fileName}`;
+      const publicId = extractPublicId(menu.imageURL);
       const result = await cloudinary.uploader.destroy(publicId);
       if (result.result !== "ok") {
         throw new Error("failed to delete old image from cloudinary");
@@ -312,11 +308,20 @@ export const toggleFeaturedMenu = async (req, res) => {
   try {
     const { id } = req.params;
     const featuredMenu = await Menu.findById(id);
-    if (featuredMenu) {
-      featuredMenu.isFeatured = !featuredMenu.isFeatured;
-      await featuredMenu.save();
-      await toggleFeaturedroductInRedis();
+    if (!featuredMenu) {
+      return res.status(404).json({
+        success: false,
+        message: "menu not found",
+      });
     }
+    featuredMenu.isFeatured = !featuredMenu.isFeatured;
+    await featuredMenu.save();
+    await toggleFeaturedroductInRedis();
+    return res.status(200).json({
+      success: true,
+      message: "menu featured status toggled successfully",
+      featuredMenu,
+    });
   } catch (error) {
     console.error("error in toggleFeaturedroduct controller", error);
     return res.status(500).json({

@@ -10,7 +10,7 @@ import upload from "../middelware/multer.middelware.js";
 const router = express.Router();
 
 
-router.get("/", protectRoute, getAllKitchen );
+router.get("/",  getAllKitchen );
 router.post("/register-kitchen",protectRoute,isVendor,upload.single('kitchenImage'),registerKitchen);
 router.patch("/:id", protectRoute, isVendor, updateKitchenStatus);
 router.put("/:id", protectRoute, isVendor,upload.single('kitchenImage'), updateKitchen);

@@ -49,13 +49,13 @@ export const getAllKitchen = async (req, res) => {
         },
       },
     ]);
-    if (!kitchen) {
+    if (kitchen.length===0) {
       return res
         .status(404)
         .json({ success: false, message: "kitchen not found" });
     }
 
-    return res.status(200).json({ success: true, kitchen });
+    return res.status(200).json({ success: true,kitchens:kitchen });
   } catch (error) {
     console.log("error in get kitchen", error.message);
     return res.status(500).json({ success: false, message: error.message });

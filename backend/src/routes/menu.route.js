@@ -31,7 +31,7 @@ router.post(
   addMenu
 );
 
-router.put("/:id", protectRoute, isVendor, updateMenu);
+router.put("/:id", protectRoute, isVendor, upload.single("productImage"), updateMenu);
 router.patch("/:id", protectRoute, isVendor, toggleFeaturedMenu);
 router.delete("/:id", protectRoute, isVendor, deleteMenu);
 
