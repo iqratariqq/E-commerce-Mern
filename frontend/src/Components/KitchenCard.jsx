@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom"
-import { CheckCircle, ChevronDown, ChevronUp, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 
-const Kitchen = ({ kitchen }) => {
+const KitchenCard = ({ kitchen }) => {
     return (
         <div className="relative mx-auto my-4  h-96 w-full rounded-2xl overflow-hidden group transition-transform hover:scale-95 duration-500 ease-out ">
-            <Link to={"category/" + kitchen.category}>
+            <Link to={"kitchen-detail/" + kitchen._id}>
                 <div className="w-full h-full cursor-pointer">
                     <div className="bg-khakhi_beige bg-opacity-30  flex  justify-between lg:p-3 p-2">
                         <h1 className="font-bold text-lg lg:text-2xl text-toupe">
                             {kitchen.kitchenName}
                         </h1>
                         {
-                            kitchen.status === "open?" ? <CheckCircle color="green" size={18} /> : <XCircle color="red" size={18} />
+                            kitchen.status === "open" ? <CheckCircle color="green" size={18} /> : <XCircle color="red" size={18} />
                         }
                     </div>
 
@@ -27,4 +27,4 @@ const Kitchen = ({ kitchen }) => {
     )
 }
 
-export default Kitchen
+export default KitchenCard

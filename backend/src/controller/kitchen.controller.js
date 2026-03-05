@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Kitchen from "../models/kitchen.model.js";
 import Review from "../models/review.model.js";
 import User from "../models/user.model.js";
@@ -22,18 +23,6 @@ export const getAllKitchen = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "users",
-          localField: "kitchenOwner",
-          foreignField: "_id",
-          as: "kitchenOwnerDetails",
-        },
-      },
-      {
-        $unwind: "$kitchenOwnerDetails",
-      },
-
-      {
         $project: {
           reviews: 0,
           kitchenOwnerDetails: {
@@ -45,6 +34,8 @@ export const getAllKitchen = async (req, res) => {
             requestStatus: 0,
             __v: 0,
             cartItem: 0,
+            reviews: 0, 
+
           },
         },
       },
@@ -288,6 +279,76 @@ export const getFeaturedKitchens = async (req, res) => {
   }
 };
 
+export const getKitchenById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("id",id)
+    const kitchen = await Kitchen.aggregate(
+      [
+        { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "kitchenId",
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          avgRating: { $avg: "$reviews.rating" },
+          reviewsCount: { $size: "$reviews" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "kitchenOwner",
+          foreignField: "_id",
+          as: "kitchenOwnerDetails",
+        },
+      },
+      {
+        $unwind: "$kitchenOwnerDetails",
+      },
+
+      {
+        $project: {
+          reviews: 0,
+          kitchenOwnerDetails: {
+            password: 0,
+            email: 0,
+            role: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            requestStatus: 0,
+            __v: 0,
+            cartItem: 0,
+          },
+        },
+      },
+      ],
+    );
+
+    if (!kitchen.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Kitchen not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      kitchen,
+    });
+  } catch (error) {
+    console.log("error in get kitchen by id", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+}
 
 export const getVendorKitchenId=async(kitechenOwner)=>{
   try {

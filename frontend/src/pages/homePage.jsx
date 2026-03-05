@@ -1,11 +1,8 @@
 
 import { useQuery } from "@tanstack/react-query";
-import biryani from "../assets/biryani.jpg";
-import daal from "../assets/daal chawal.jpg";
-import karahi from "../assets/karahi.webp";
-import Categories from "../Components/Category";
+
 import { getAllKitchens } from "../api/kitchenApi";
-import Kitchen from "../Components/Kitchen";
+import KitchenCard from "../Components/KitchenCard";
 
 
 
@@ -24,7 +21,7 @@ console.log("kitchens in home page", data)
       <h1 className="text-center font-bold  text-3xl  bg-gradient-to-r from-toupe  to-yellow-700 bg-clip-text text-transparent">Check our latest Catogries</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 sm:grid-cols-2 mx-2 gap-4">
         {data?.kitchens?.map((kitchen) => (
-          <Kitchen key={kitchen._id} kitchen={kitchen} />
+          <KitchenCard key={kitchen._id} kitchen={kitchen} />
         ))}
       </div>
 

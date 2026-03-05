@@ -37,7 +37,10 @@ const kitchenSchema = new mongoose.Schema(
       enum: ["close","open","busy"],
       default: "open"
     },
-
+    description: {
+      type: String,
+      default: ""
+    },
     menuItems: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Menu",

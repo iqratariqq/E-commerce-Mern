@@ -1,9 +1,12 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
-const HomePage = lazy(() => import("./pages/HomePage.jsx"))
+// const HomePage = lazy(() => import("./Pages/HomePage.jsx"))
 
-const LoginPage = lazy(() => import("./pages/LoginPage.jsx"))
-const SignUpPage = lazy(() => import("./pages/SignUpPage.jsx"));
+// const LoginPage = lazy(() => import("./Pages/LoginPage.jsx"))
+// const SignUpPage = lazy(() => import("./Pages/SignUpPage.jsx"));
+import HomePage from "./Pages/HomePage.jsx"
+import LoginPage from "./Pages/LoginPage.jsx"
+import SignUpPage from "./Pages/SignUpPage.jsx";
 import Layout from "./Components/Layout.jsx";
 import useAuthuser from "./hooks/useAuth.js";
 import Loader from "./Components/Loader.jsx"
@@ -11,6 +14,8 @@ import CartPage from "./Pages/CartPage.jsx";
 import { Toaster } from "react-hot-toast";
 import VendorDashboard from "./Pages/VendorDashboard.jsx";
 import RegisterKitchen from "./Pages/RegisterKitchen.jsx";
+import KitchenDetailPage from "./Pages/KitchenDetailPage.jsx";
+import KitchenMenu from "./Pages/KitchenMenu.jsx";
 
 
 function App() {
@@ -27,8 +32,8 @@ function App() {
 
   function RedirectAuthenticatedUser({ children }) {
 
-    if (isAuthenticated && authUser?.user?.role === "Customer") {
-
+    if (isAuthenticated && authUser?.user?.role === "customer") {
+      console.log("redirecting authenticated customer to home page")
       return <Navigate to="/" replace />
     }
 
@@ -46,7 +51,6 @@ function App() {
 
   function ProtectRoute({ children }) {
     if (!isAuthenticated) {
-
       return <Navigate to="/" replace />
     }
 
@@ -64,7 +68,6 @@ function App() {
              bg-[radial-gradient(ellipse_at_top,rgba(255,180,120,0.35)_0%,rgba(239,200,26,0.15)_45%,rgba(0,0,0,0)_100%)]"
           ></div>
         </div>
-
       </div>
 
 
@@ -72,12 +75,9 @@ function App() {
       <div className="relative z-50 " >
         <Routes>
           <Route path="/" element={
-            <RedirectAuthenticatedUser>
-
-              <Layout>
-                <HomePage />
-              </Layout>
-            </RedirectAuthenticatedUser>
+            <Layout>
+              <HomePage />
+            </Layout>
           } />
           <Route path="/login" element={
             <RedirectAuthenticatedUser>
@@ -104,6 +104,19 @@ function App() {
             </RedirectAuthenticatedUser>
           } />
 
+          <Route path="kitchen-detail/:id" element={
+            <ProtectRoute>
+              <KitchenDetailPage />
+            </ProtectRoute>
+
+          } />
+
+          <Route path="kitchen-detail/:id/Menu" element={
+            <ProtectRoute>
+              <KitchenMenu/>
+            </ProtectRoute>
+
+          } />
 
           <Route path="/cart" element={
             <ProtectRoute>
