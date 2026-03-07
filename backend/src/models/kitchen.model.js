@@ -46,6 +46,11 @@ const kitchenSchema = new mongoose.Schema(
       ref: "Menu",
       default: []
     }],
+    reviews: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+      default: []
+    }],
 
     location: {
       type: {

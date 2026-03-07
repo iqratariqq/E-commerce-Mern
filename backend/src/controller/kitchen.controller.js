@@ -322,6 +322,7 @@ export const getKitchenById = async (req, res) => {
             createdAt: 0,
             updatedAt: 0,
             requestStatus: 0,
+            menuItems:0,
             __v: 0,
             cartItem: 0,
           },

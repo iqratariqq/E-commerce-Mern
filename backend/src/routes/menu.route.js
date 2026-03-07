@@ -9,6 +9,7 @@ import {
   getCategoryMenu,
   getFeaturedMenu,
   getKitchenMenu,
+  getMenuById,
   getRecommendedMenu,
   toggleFeaturedMenu,
   updateMenu,
@@ -17,6 +18,7 @@ import upload from "../middelware/multer.middelware.js";
 const router = express.Router();
 
 router.get("/", protectRoute, getKitchenMenu);
+router.get("/:id", protectRoute, getKitchenMenu);
 
 //all users can access featured products
 router.get("/featured-products", getFeaturedMenu);

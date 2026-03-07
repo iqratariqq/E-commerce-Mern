@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom"
+import { Link, Navigate, useParams } from "react-router-dom"
 import { useKitchen } from "../hooks/useKitchen";
 import { ChefHat, SquareChevronLeftIcon } from "lucide-react";
 import { useState } from "react";
+import KitchenMenu from "./KitchenMenu";
 
 
 
@@ -41,12 +42,13 @@ const KitchenDetailPage = () => {
             className={` flex items-center justify-center py-2 px-4 rounded-sm text-lg lg:text-2xl lg:px-5 w-44 font-medium text-toupe hover:bg-toupe  hover:text-pupkin_spice  
                ${activeTab === tab.id ? "bg-pupkin_spice text-off_white " : "bg-toupe/25 text-pupkin_spice "} `}
           >
-
             {tab.name}
           </button>
 
         ))}
       </div>
+      {console.log("activeTab", activeTab)}
+      {activeTab==="menu" && <KitchenMenu kitchenId={id} />}
 
     </>
   )

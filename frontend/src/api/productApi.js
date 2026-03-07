@@ -30,3 +30,11 @@ export const toggleFeaturedProduct = async (productId) => {
   const response = await axiosInstance.patch(`/menu/${productId}`);
   return response;
 };
+
+export const getMenuByKitchenId = async (kitchenId) => {
+console.log("fetching menu for kitchen id", kitchenId);
+  const response=await axiosInstance.get(`/menu/${kitchenId}`);
+  console.log("menu data in api", response.data);
+  return response.data;
+}
+

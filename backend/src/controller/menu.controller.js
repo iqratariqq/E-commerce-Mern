@@ -7,10 +7,18 @@ import cloudinary, {
 import kitchen from "../models/kitchen.model.js";
 import fs from "fs";
 import { getVendorKitchenId } from "./kitchen.controller.js";
+import mongoose from "mongoose";
 
 export const getKitchenMenu = async (req, res) => {
   try {
-    const kitchenId = await getVendorKitchenId(req.user._id);
+    let kitchenId=null
+    kitchenId=req.params.id
+    console.log("kitchenId in getKitchenMenu controller", kitchenId);
+    if(!kitchenId){
+
+
+     kitchenId = await getVendorKitchenId(req.user._id);
+    }
     if (!kitchenId) {
       return res
         .status(400)
@@ -38,6 +46,34 @@ export const getKitchenMenu = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+export const getMenuById = async (req, res) => {
+  try {
+    console.log("in getMenuById controller", req.params.id);
+    const { id } = req.params;
+    const menus=await Menu.aggregate([
+      {$match:{kitchen:new mongoose.Types.ObjectId(id)}},
+      
+    {
+      $project:{
+        createdAt:0,
+        updatedAt:0,
+          __v:0, 
+      }
+    }
+
+
+    ])
+    if(menus.length===0){
+      return res.status(404).json({success:false,message:"Menu not found"})
+    } 
+    return res.status(200).json({success:true,menu:menus[0]})
+  } catch (error) {
+    console.error("error in getMenuById controller", error);  
+    return res.status(500).json({success:false,message:"Internal server error",error:error.message});
+    
+  }
+}
 
 export const getFeaturedMenu = async (req, res) => {
   try {
