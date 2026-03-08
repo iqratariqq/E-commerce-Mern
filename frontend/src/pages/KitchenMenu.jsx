@@ -17,10 +17,10 @@ const KitchenMenu = () => {
 
     }
   )
-  console.log("menu data in KitchenMenu", data.Menus)
+  console.log("menu data in KitchenMenu", data?.Menus)
 
   return (
-    <div className="  bg-gradient-to-b from-taupeDark to-taupeDeep">
+    <div className="  bg-gradient-to-b from-taupeDark to-taupeDeep pb-5">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -58,9 +58,9 @@ const KitchenMenu = () => {
         }
 
       </div>
-      <div className=" max-w-5xl grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))]  gap-4 mt-8  mx-auto px-4 border-red-500 border justify-items-center">
+      <div className=" max-w-5xl grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))]  gap-4 mt-8  mx-auto px-4 justify-items-center">
         {
-          data.Menus.map((Menu) => (<MenuCard key={Menu.id} menu={Menu} />))
+          data?.Menus.map((Menu) => (<MenuCard key={Menu.id} menu={Menu} />))
         }
 
       </div>
