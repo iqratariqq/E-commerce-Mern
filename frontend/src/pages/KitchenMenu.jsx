@@ -6,18 +6,23 @@ import { Utensils } from "lucide-react";
 import { useState } from "react"
 import MenuCard from "../Components/MenuCard";
 
+
 const KitchenMenu = () => {
   const { id } = useParams();
   const filters = ["All", "Lunch", "Dinner", "Snacks"]
   const [activeFilter, setActiveFilter] = useState("All")
-  const { data, isPending } = useQuery(
+
+  const { data, isLoading } = useQuery(
     {
       queryKey: ["getMenuByKitchenId"],
       queryFn: () => getMenuByKitchenId(id)
 
     }
   )
+
   console.log("menu data in KitchenMenu", data?.Menus)
+
+
 
   return (
     <div className="  bg-gradient-to-b from-taupeDark to-taupeDeep pb-5">

@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 router.get("/", protectRoute, getCartItems);
-router.post("/", protectRoute,isCustomer, addtoCart);
+router.post("/:id", protectRoute,isCustomer, addtoCart);
 router.patch("/", protectRoute,isCustomer, removeAllItem);
 router.patch("/:id", protectRoute,isCustomer, updateCart);
 export default router;

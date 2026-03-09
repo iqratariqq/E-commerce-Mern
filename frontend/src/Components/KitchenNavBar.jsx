@@ -11,7 +11,7 @@ const KitchenNavBar = ({ kitchenData }) => {
         { name: "Contact", id: "contact" }
     ]
     const [activeTab, setActiveTab] = useState("overview");
-       const [isScrolled, setIsScrolled] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {

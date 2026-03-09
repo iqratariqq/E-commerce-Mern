@@ -3,12 +3,14 @@ import { Link } from "react-router-dom"
 import useAuthuser  from "../hooks/useAuth"
 import { getInitials } from "../lib/getInitial";
 import { authStores } from "../Store/authStores";
+import { useCart } from "../hooks/useCart";
 
 
 const Navbar = () => {
 
  
 const {authUser}=useAuthuser()
+const{cart}=useCart()
   
   return (
     <header className=" fixed top-0 w-full border-b  left-0 border-khakhi_beige bg-toupe bg-opacity-60 shadow-lg transition-all duration-300 z-40 backdrop-blur-md  ">
@@ -19,7 +21,7 @@ const {authUser}=useAuthuser()
           <Link to={"/cart"} className="relative group "><ShoppingCart className=" inline-block mr-1 group-hover:text-pupkin_spice text-gray-200" size={20} />
             <span className="hidden sm:inline text-gray-200 group-hover:text-pupkin_spice transition-all ease-in-out duration-300">Cart</span>
             <span className="absolute -top-3 -left-3 bg-orange-700 text-white text-xs  rounded-full px-2 py-0.5 group-hover:bg-pupkin_spice transition-all ease-in-out duration-300">
-              3
+              {cart?.userProducts.length }
             </span>
           </Link>
           {authUser ? (

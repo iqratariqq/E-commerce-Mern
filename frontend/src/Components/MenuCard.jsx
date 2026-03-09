@@ -1,9 +1,19 @@
 import { motion } from "framer-motion"
-import { ShoppingCartIcon, Star, StarIcon } from "lucide-react"
+import { Loader, ShoppingCartIcon, Star, StarIcon } from "lucide-react"
+import { useAddtoCart } from "../hooks/useAddtoCart";
 
 
 
 const MenuCard = ({ menu }) => {
+    const { addtoCartMutation, isPending, isError } = useAddtoCart();
+    
+
+    const handleAddtoCart = (menuId) => {
+    console.log("add to cart", menuId)
+    console.log("addtoCartMutation in MenuCard")
+    addtoCartMutation(menuId)
+
+  }
   console.log("menu item in MenuCard", menu)
   return (
     <div className="bg-toupe/45 rounded-lg  w-full max-w-sm border   hover:bg-toupe/60 transition-all duration-300 cursor-pointer shadow-md border-beige/25 hover:shadow-lg hover:-translate-y-2  hover:border-pumpkin/50 relative "
@@ -29,10 +39,19 @@ const MenuCard = ({ menu }) => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={()=>handleAddtoCart(menu._id)}
+            disabled={isPending}
             className="bg-gradient-to-r from-pumpkin to-pumpkinDark hover:bg-pumpkin/80 text-offWhite  py-2 px-4 rounded-lg flex items-center gap-2"
           >
-            <ShoppingCartIcon />
+            {isPending ? <div className='flex justify-center gap-3'>
+                <Loader className="animate-spin" size={20} />
+                <span className='text-sm font-medium '> Loading...</span>
+              </div> : <>
+
+                            <ShoppingCartIcon />
             <span>Add to Cart</span>
+              </>}
+
           </motion.button>
 
 

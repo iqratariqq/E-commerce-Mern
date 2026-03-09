@@ -20,9 +20,27 @@ export const getCartItems = async (req, res) => {
           localField:"productDetails.kitchen",
           foreignField:"_id",
           as: "kitchenDetails"
+        }},
+        {$unwind:"$kitchenDetails"},
+        {$project:{
+          __v:0,
+          password:0,
+          email:0,
+          "cartItem._id":0,
+            "cartItem.product":0,
+              "productDetails._id":0,
+              
+              "productDetails.kitchen":0,
+              "kitchenDetails._id":0,
+              "kitchenDetails.kitchenOwner":0,
+              "kitchenDetails.menuItems":0,
+              "kitchenDetails.createdAt":0,
+              "kitchenDetails.updatedAt":0,
+              "kitchenDetails.__v":0,
+
         }}
     ])
-  
+  console.log("userProducts in getCartItems", userProducts)
     if (userProducts.cartItem?.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });
     }
@@ -38,7 +56,7 @@ export const getCartItems = async (req, res) => {
 
 export const addtoCart = async (req, res) => {
   try {
-    const { id: productId } = req.body;
+    const { id: productId } = req.params;
     const user = req.user;
 
     const product=await Menu.findById(productId);

@@ -13,7 +13,6 @@ export const getKitchenMenu = async (req, res) => {
   try {
     let kitchenId=null
     kitchenId=req.params.id
-    console.log("kitchenId in getKitchenMenu controller", kitchenId);
     if(!kitchenId){
 
 
