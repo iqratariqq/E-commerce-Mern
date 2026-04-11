@@ -282,7 +282,7 @@ export const getFeaturedKitchens = async (req, res) => {
 export const getKitchenById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("id",id)
+ 
     const kitchen = await Kitchen.aggregate(
       [
         { $match: { _id: new mongoose.Types.ObjectId(id) } },

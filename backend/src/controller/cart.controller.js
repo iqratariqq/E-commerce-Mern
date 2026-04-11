@@ -4,43 +4,52 @@ import User from "../models/user.model.js";
 export const getCartItems = async (req, res) => {
   try {
     const user = req.user;
+    console.log("user in getCartItems controller", user._id);
     const userProducts = await User.aggregate([
       { $match: { _id: user._id } },
       { $unwind: "$cartItem" },
-      { $lookup: {
+      {
+        $lookup: {
           from: "menus",
           localField: "cartItem.product",
           foreignField: "_id",
-          as: "productDetails"
-        }},{$unwind: "$productDetails"
+          as: "productDetails",
+        },
+      },
+      { $unwind: "$productDetails" },
+      {
+        $lookup: {
+          from: "kitchens",
+          localField: "productDetails.kitchen",
+          foreignField: "_id",
+          as: "kitchenDetails",
+        },
+      },
+      { $unwind: "$kitchenDetails" },
+      {
+        $project: {
+          __v: 0,
+          password: 0,
+          email: 0,
+          _id: 0,
+          createdAt: 0,
+          updatedAt: 0,
+          "cartItem._id": 0,
+          "productDetails.createdAt": 0,
+          "productDetails.updatedAt": 0,
+          "productDetails.__v": 0,
+          "productDetails.kitchen": 0,
+          "kitchenDetails._id": 0,
+          "kitchenDetails.kitchenOwner": 0,
+          "kitchenDetails.menuItems": 0,
+          "kitchenDetails.createdAt": 0,
+          "kitchenDetails.updatedAt": 0,
+          "kitchenDetails.__v": 0,
+        },
+      },
+    ]);
+    console.log("userProducts in getCartItems controller", userProducts);
 
-        }
-        ,{$lookup:{
-          from:"kitchens",
-          localField:"productDetails.kitchen",
-          foreignField:"_id",
-          as: "kitchenDetails"
-        }},
-        {$unwind:"$kitchenDetails"},
-        {$project:{
-          __v:0,
-          password:0,
-          email:0,
-          "cartItem._id":0,
-            "cartItem.product":0,
-              "productDetails._id":0,
-              
-              "productDetails.kitchen":0,
-              "kitchenDetails._id":0,
-              "kitchenDetails.kitchenOwner":0,
-              "kitchenDetails.menuItems":0,
-              "kitchenDetails.createdAt":0,
-              "kitchenDetails.updatedAt":0,
-              "kitchenDetails.__v":0,
-
-        }}
-    ])
-  console.log("userProducts in getCartItems", userProducts)
     if (userProducts.cartItem?.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });
     }
@@ -59,13 +68,15 @@ export const addtoCart = async (req, res) => {
     const { id: productId } = req.params;
     const user = req.user;
 
-    const product=await Menu.findById(productId);
-    if(!product || !product?.isAvailable){
-      return res.status(404).json({success:false,message:"product not found or unavailable"})
+    const product = await Menu.findById(productId);
+    if (!product || !product?.isAvailable) {
+      return res
+        .status(404)
+        .json({ success: false, message: "product not found or unavailable" });
     }
 
-    const existingItem = await user.cartItem.find(                                                                                                                                                                                                                        
-      (item) => item.product.toString() == productId
+    const existingItem = await user.cartItem.find(
+      (item) => item.product.toString() == productId,
     );
     if (existingItem) {
       existingItem.quantity += 1;
@@ -86,15 +97,17 @@ export const addtoCart = async (req, res) => {
 
 export const removeAllItem = async (req, res) => {
   try {
-    const { id: productId } = req.body;
+    const { productId } = req.body;
+    console.log("productId:", productId);
     const user = req.user;
+    console.log("user.cartItem:", user.cartItem);
     const cartProduct = await user.cartItem.find(
-      (item) => item.product.toString() == productId
+      (item) => item.product.toString() == productId,
     );
-
+    console.log("cartProduct:", cartProduct);
     if (cartProduct) {
       user.cartItem = await user.cartItem.filter(
-        (item) => item.product.toString() !== productId
+        (item) => item.product.toString() !== productId,
       );
       await user.save();
       return res
@@ -120,12 +133,12 @@ export const updateCart = async (req, res) => {
     const user = req.user;
 
     const cartItem = await user.cartItem.find(
-      (item) => item.product.toString() === productId
+      (item) => item.product.toString() === productId,
     );
     if (cartItem) {
       if (quantity === 0) {
         user.cartItem = await user.cartItem.filter(
-          (item) => item.product.toString() !== productId
+          (item) => item.product.toString() !== productId,
         );
       } else {
         cartItem.quantity = quantity;

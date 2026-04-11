@@ -5,7 +5,7 @@ export const useCart = () => {
     const { data, isLoading, isError } = useQuery(
       {
         queryKey:["getCartItems"],
-          queryFn:getCartItems()
+          queryFn:getCartItems
     
       }
     )

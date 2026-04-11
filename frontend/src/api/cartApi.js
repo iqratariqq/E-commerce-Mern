@@ -12,3 +12,9 @@ export const getCartItems=async()=>{
     console.log("response from getCartItems api", res.data)
     return res.data;
 }
+
+export const removeAllItem=async(productId)=>{
+    console.log("removeAllItem api called with productId:", productId)
+    const res=await axiosInstance.patch("/cart", {productId})
+    return res.data;
+}

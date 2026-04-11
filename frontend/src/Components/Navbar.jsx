@@ -20,9 +20,11 @@ const{cart}=useCart()
           <Link to={"/"} className="text-gray-200 hover:text-pupkin_spice transition-all ease-in-out duration-300">Home</Link>
           <Link to={"/cart"} className="relative group "><ShoppingCart className=" inline-block mr-1 group-hover:text-pupkin_spice text-gray-200" size={20} />
             <span className="hidden sm:inline text-gray-200 group-hover:text-pupkin_spice transition-all ease-in-out duration-300">Cart</span>
-            <span className="absolute -top-3 -left-3 bg-orange-700 text-white text-xs  rounded-full px-2 py-0.5 group-hover:bg-pupkin_spice transition-all ease-in-out duration-300">
+            { cart?.userProducts.length &&            <span className="absolute -top-3 -left-3 bg-orange-700 text-white text-xs  rounded-full px-2 py-0.5 group-hover:bg-pupkin_spice transition-all ease-in-out duration-300">
               {cart?.userProducts.length }
             </span>
+            }
+
           </Link>
           {authUser ? (
             <Link to={"/account"} className="relative group"><User2Icon className=" inline-block mr-1 group-hover:text-pupkin_spice text-gray-200" size={20} />

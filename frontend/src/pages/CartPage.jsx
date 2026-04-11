@@ -1,27 +1,47 @@
+import { useQuery } from "@tanstack/react-query"
 import { useCart } from "../hooks/useCart"
+import { motion } from "framer-motion"
+import CartItem from "../Components/CartItem"
 
 
 const CartPage = () => {
-const {cart,isLoading,isError}=useCart();
-console.log("cart items in CartPage", cart?.userProducts)
-console.log("quentity",data?.userProducts.length )
+  const { cart } = useCart()
+  // const{data:cart,isLoading,isError}=useQuery(
+  //   {
+  //     queryKey:["getcart"],
+  //     queryFn:getCartItems,
+  //   }
+  // )
+  console.log("cart items in CartPage", cart?.userProducts)
+  console.log("quentity", cart?.userProducts.length)
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Cart Page</h1>
-      {cart?.userProducts.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <div>
-          {cart?.userProducts?.map((item) => (
-            <div key={item._id}>
-              <h2>{item.productDetails.name}</h2>
-              <p>Quantity: {item.cartItem.quantity}</p>
-              <p>Price: ${item.productDetails.price.toFixed(2)}</p>
-            </div>
-          ))}
+    <div className="py-8 md:py-16">
+      <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
+        <div className="">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+          >
+            {cart?.userProducts.length === 0 ? (
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-800">Your cart is empty</h2>
+              </div>
+            ) : (
+              <div>
+                {cart?.userProducts?.map((item) => (
+                  <CartItem key={item._id} item={item} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+
         </div>
-      )}
+
+      </div>
+
+
     </div>
   )
 }
