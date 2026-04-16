@@ -4,7 +4,6 @@ import User from "../models/user.model.js";
 export const getCartItems = async (req, res) => {
   try {
     const user = req.user;
-    console.log("user in getCartItems controller", user._id);
     const userProducts = await User.aggregate([
       { $match: { _id: user._id } },
       { $unwind: "$cartItem" },
@@ -48,7 +47,6 @@ export const getCartItems = async (req, res) => {
         },
       },
     ]);
-    console.log("userProducts in getCartItems controller", userProducts);
 
     if (userProducts.cartItem?.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });
@@ -129,6 +127,7 @@ export const removeAllItem = async (req, res) => {
 export const updateCart = async (req, res) => {
   try {
     const { id: productId } = req.params;
+    console.log("productId:", productId);
     const { quantity } = req.body;
     const user = req.user;
 

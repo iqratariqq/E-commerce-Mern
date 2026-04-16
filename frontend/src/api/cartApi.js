@@ -18,3 +18,9 @@ export const removeAllItem=async(productId)=>{
     const res=await axiosInstance.patch("/cart", {productId})
     return res.data;
 }
+
+export const updateCartItem=async({productId, quantity})=>{
+    console.log("updateCartItem api called with productId:", productId, " and quantity:", quantity)
+    const res=await axiosInstance.put(`/cart/${productId}`, { quantity })
+    return res.data;
+}

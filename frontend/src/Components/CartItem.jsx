@@ -1,28 +1,36 @@
 import { Minus, Plus, Trash } from 'lucide-react'
 import { motion } from "framer-motion"
-import React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { removeAllItem } from '../api/cartApi'
 import { toast } from 'react-hot-toast'
+import { useUpdateCartItem } from '../hooks/useUpdateCartItem'
 
 const CartItem = ({ item }) => {
+
   const queryClient = useQueryClient()
-  const {mutate:removeItemMutation,isPending}=useMutation(
+  const { mutate: removeItemMutation, isPending } = useMutation(
     {
-      queryKey:["removeAllItem"],
-      mutationFn:removeAllItem,
-      onSuccess:()=>{
+      queryKey: ["removeAllItem"],
+      mutationFn: removeAllItem,
+      onSuccess: () => {
         toast.success("item removed successfully"),
-        queryClient.invalidateQueries({ queryKey: ["getCartItems"] });
+          queryClient.invalidateQueries({ queryKey: ["getCartItems"] });
 
       },
-      onError:(err)=>{
-        toast.error(err.message || "failed to remove item") 
+      onError: (err) => {
+        toast.error(err.message || "failed to remove item")
       }
     }
   )
-  const handleRemoveAllItem=(productId)=>{
-    console.log("handleRemoveAllItem called with productId:", productId," and item._id:", item)
+  const {updateCartItemMutation,isPending:updateCartItemisPending} =useUpdateCartItem()
+
+  const handleUpdateItem = (productId, quantity) => {
+    console.log("handleUpdateItem called with productId:", productId, " and quantity:", quantity)
+    updateCartItemMutation({productId, quantity} )
+  }
+
+  const handleRemoveAllItem = (productId) => {
+    console.log("handleRemoveAllItem called with productId:", productId, " and item._id:", item)
     removeItemMutation(productId)
   }
   return (
@@ -39,16 +47,18 @@ const CartItem = ({ item }) => {
           <div className='md:flex md:justify-between md:items-center  ' >
             <p className='text-sm hidden md:block '>{item?.productDetails.description}</p>
             <div className='flex items-center gap-2'>
-              <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="inline-flex size-5 items-center justify-center bg-beige/50 border border-beige rounded-sm hover:bg-beige/75 hover:outline-none "><Minus className='text-offWhite' /></motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleUpdateItem(item?.productDetails?._id, item?.cartItem.quantity - 1)}
+                className="inline-flex size-5 items-center justify-center bg-beige/50 border border-beige rounded-sm hover:bg-beige/75 hover:outline-none "><Minus className='text-offWhite' /></motion.button>
               <p>{item?.cartItem.quantity}</p>
-              <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="inline-flex size-5 items-center justify-center bg-beige/50 border border-beige rounded-sm hover:bg-beige/75 hover:outline-none"><Plus className='text-offWhite'
-              /></motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleUpdateItem(item?.productDetails?._id, item?.cartItem.quantity + 1)}
+                className="inline-flex size-5 items-center justify-center bg-beige/50 border border-beige rounded-sm hover:bg-beige/75 hover:outline-none"><Plus className='text-offWhite'
+                /></motion.button>
             </div>
             <p className="text-offWhite" >RS. <span>{item?.productDetails?.price?.toFixed(2) * item?.cartItem.quantity}
             </span></p>
@@ -56,9 +66,9 @@ const CartItem = ({ item }) => {
           <motion.button className='inline-flex items-center text-sm text-red-500 hover:text-red-700 focus:outline-none'
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={()=>handleRemoveAllItem(item?.productDetails?._id)}
+            onClick={() => handleRemoveAllItem(item?.productDetails?._id)}
           >
-          <Trash className='text-red-500 size-5' />
+            <Trash className='text-red-500 size-5' />
           </motion.button>
         </div>
 
