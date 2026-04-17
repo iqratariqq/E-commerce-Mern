@@ -4,6 +4,7 @@ import Review from "../models/review.model.js";
 export const getReviews = async (req, res) => {
   try {
     const { id: kitchenId } = req.params;
+    console.log("kitchen id in get reviews controller", kitchenId);
     const reviews = await Review.find({ kitchenId }).populate(
       "userId",
       "userName"
@@ -24,6 +25,7 @@ export const getReviews = async (req, res) => {
     });
   }
 };
+
 
 export const addReview = async (req, res) => {
   try {

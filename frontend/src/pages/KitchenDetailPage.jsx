@@ -1,10 +1,9 @@
 import { Link, Navigate, useParams } from "react-router-dom"
 import { useKitchen } from "../hooks/useKitchen";
-import { ChefHat, SquareChevronLeftIcon } from "lucide-react";
-import { useState } from "react";
 import KitchenMenu from "./KitchenMenu";
 import KitchenNavBar from "../Components/KitchenNavBar";
 import KitchenOverviewPage from "./KitchenOverviewPage";
+import KitchenReviewsPage from "./KitchenReviewsPage";
 
 
 
@@ -20,6 +19,7 @@ console.log("kitchenData in KitchenDetailPage", kitchenData)
 <KitchenNavBar kitchenData={kitchenData}/>
 <KitchenOverviewPage/>
 <KitchenMenu kitchenId={id} />
+<KitchenReviewsPage kitchenId={id} />
       
 
     </>

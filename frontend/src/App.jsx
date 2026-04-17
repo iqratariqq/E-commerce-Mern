@@ -16,6 +16,7 @@ import VendorDashboard from "./Pages/VendorDashboard.jsx";
 import RegisterKitchen from "./Pages/RegisterKitchen.jsx";
 import KitchenDetailPage from "./Pages/KitchenDetailPage.jsx";
 import KitchenMenu from "./Pages/KitchenMenu.jsx";
+import KitchenReviewsPage from "./Pages/KitchenReviewsPage.jsx";
 
 
 function App() {
@@ -44,9 +45,7 @@ function App() {
 
       return <Navigate to="/vendor/vendor-dashboard" replace />
     }
-
     return children
-
   }
 
   function ProtectRoute({ children }) {
@@ -113,16 +112,25 @@ function App() {
 
           <Route path="kitchen-detail/:id/Menu" element={
             <ProtectRoute>
-              <KitchenMenu/>
+              <KitchenMenu />
             </ProtectRoute>
 
           } />
+
+          <Route path="kitchen-detail/:id/reviews" element={
+            <ProtectRoute>
+              <KitchenReviewsPage />
+            </ProtectRoute>
+
+          }
+          />
 
           <Route path="/cart" element={
             <ProtectRoute>
               <CartPage />
             </ProtectRoute>
           } />
+          
         </Routes>
         <Toaster />
       </div>
