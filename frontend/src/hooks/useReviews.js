@@ -15,7 +15,7 @@ export const useReviews=(kitchenId )=>{
         }
     )
     return {
-        reviews:reviewsData.data,
+        reviewsData:reviewsData.data,
         isLoading:reviewsData.isLoading,
         error:reviewsData.error
     }
