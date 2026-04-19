@@ -76,6 +76,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
+
   try {
     if (!email || !password) {
       return res
@@ -83,6 +84,7 @@ export const login = async (req, res) => {
         .json({ succuss: false, message: "all fields are required" });
     }
     const user = await User.findOne({ email });
+console.log("user in login controller", user)
     if (!user) {
       return res.status(401).json({ succuss: false, message: "invalid email" });
     }
@@ -118,7 +120,14 @@ export const login = async (req, res) => {
         password: undefined,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log("error in login", error);
+    return res.status(500).json({
+      success: false,
+      message: "internal server error",
+      error: error.message,
+    });
+  }
 };
 
 export const logout = async (req, res) => {
