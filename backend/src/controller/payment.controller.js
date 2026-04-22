@@ -3,11 +3,12 @@ import Kitchen from "../models/kitchen.model.js";
 import Order from "../models/order.model.js";
 import { stripe } from "../Utils/stripe.js";
 import { findCoupon } from "./coupon.controller.js";
+import "dotenv/config.js";
 
 export const createCheckoutSession = async (req, res) => {
   try {
     const { products, couponCode } = req.body;
-    if (products.length === 0 || !Array.isArray(products)) {
+    if (products?.length === 0 || !Array.isArray(products)) {
       return res
         .status(400)
         .json({ success: false, message: "product array is empty" });
@@ -15,28 +16,32 @@ export const createCheckoutSession = async (req, res) => {
     let totalAmmount = 0;
 
     const liteItems = products.map((product) => {
-      const amount = Math.round(product.price * 100); // in stripe amount should be in cents,now considering the payment is in usd
-      totalAmmount += amount * product.quantity;
+      const amount = Math.round(product.productDetails.price * 100); // in stripe amount should be in cents,now considering the payment is in usd
+      totalAmmount += amount * product.cartItem.quantity;
       return {
         price_data: {
           currency: "usd",
           product_data: {
-            name: product.name,
-            image: product.image,
+            name: product.productDetails.name,
+            images: [product.productDetails.imageURL],
           },
           unit_amount: amount,
-          quantity: product.quantity,
         },
+        quantity: product.cartItem.quantity,
       };
     });
 
+  
+
+    //todo: check if coupon code is valid and apply discount
     const coupon = await findCoupon(couponCode, req.user._id);
     if (coupon) {
       totalAmmount -= Math.round(
-        (totalAmmount * coupon.discountPercentage) / 100
+        (totalAmmount * coupon.discountPercentage) / 100,
       );
     }
 
+   
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: liteItems,
@@ -55,10 +60,10 @@ export const createCheckoutSession = async (req, res) => {
         couponCode: couponCode || " ",
         products: JSON.stringify(
           products.map((p) => ({
-            id: p._id,
-            quantity: p.quantity,
-            price: p.price,
-          }))
+            id: p.productDetails._id,
+            quantity: p.cartItem.quantity,
+            price: p.productDetails.price,
+          })),
         ),
       },
     });
@@ -87,11 +92,12 @@ const createStripeCoupon = async (discountPercentage) => {
 };
 
 export const createNewCoupon = async (userId) => {
+  console.log("Creating new coupon for user:", userId);
   try {
     const newCoupon = new Coupon({
       code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
       discountPercentage: 10,
-      user: userId,
+      userId: userId,
       expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //30 days
     });
     await newCoupon.save();
@@ -113,7 +119,7 @@ export const checkoutSuccess = async (req, res) => {
         },
         {
           isActive: false,
-        }
+        },
       );
 
       const products = JSON.parse(session.metadata.products);
@@ -156,7 +162,7 @@ export const getUserOrders = async (req, res) => {
   try {
     const userId = req.user._id;
     const kitchen = await Kitchen.findOne({ kitchenOwner: userId }).select(
-      "menuItems"
+      "menuItems",
     );
     const orders = await Order.aggregate([
       {
@@ -202,7 +208,7 @@ export const checkout = async (req, res) => {
       })),
       totalAmount: products.reduce(
         (total, p) => total + p.price * p.quantity,
-        0
+        0,
       ),
     });
     await newOrder.save();
@@ -226,12 +232,22 @@ export const markOrderAsDelivered = async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ success: false, message: "order not found" });
-    } order.isDelivered = true;
+      return res
+        .status(404)
+        .json({ success: false, message: "order not found" });
+    }
+    order.isDelivered = true;
     await order.save();
-    return res.status(200).json({ success: true, message: "order marked as delivered successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "order marked as delivered successfully",
+    });
   } catch (error) {
     console.error("error in mark order as delivered controller", error);
-    return res.status(500).json({success: false, message: "Internal server error", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };

@@ -60,7 +60,7 @@ export const validateCoupon = async (req, res) => {
 
 export const findCoupon=async(couponCode,userId)=>{
   try {
-    const coupon=null
+    let coupon=null
    coupon  = await Coupon.findOne({
       code: couponCode,
       userId,

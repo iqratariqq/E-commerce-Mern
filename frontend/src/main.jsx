@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-query'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 const clientId = import.meta.env.VITE_CLIENT_ID;
-console.log("Client ID:", clientId);
+
 
 const queryClient = new QueryClient()
 

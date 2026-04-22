@@ -29,7 +29,6 @@ export const protectRoute = async (req, res, next) => {
         .status(404)
         .json({ message: "User not found by userID in token " });
     }
-
     req.user = user;
     next();
   } catch (error) {

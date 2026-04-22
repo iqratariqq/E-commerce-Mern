@@ -47,6 +47,7 @@ export const getCartItems = async (req, res) => {
         },
       },
     ]);
+    
 
     if (userProducts.cartItem?.length === 0) {
       return res.status(404).json({ sucess: false, message: "no items found" });

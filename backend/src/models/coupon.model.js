@@ -3,7 +3,7 @@ import mongoose, { Mongoose } from "mongoose";
 const couponSchema = new mongoose.Schema(
   {
     code: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
     },

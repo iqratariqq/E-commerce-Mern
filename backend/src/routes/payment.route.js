@@ -9,6 +9,7 @@ router.post("/create-checkout-session",protectRoute,createCheckoutSession)
 
 router.get("/checkout-success",protectRoute,checkoutSuccess)
 
+
 router.post("/checkout", protectRoute, isCustomer,checkout);
 router.patch("/mark-order-delivered/:orderId",protectRoute,isVendor,markOrderAsDelivered);
 router.get("/",protectRoute,isVendor,getUserOrders);
