@@ -9,16 +9,19 @@ const OrderSummary = ({ cart }) => {
 
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
-console.log("Cart in OrderSummary:", cart); // Debugging log to check the cart data
+  console.log("Cart in OrderSummary:", cart); // Debugging log to check the cart data
   const handleCheckout = async () => {
     const stripe = await stripePromise
     try {
-      const res=await axiosInstance.post("/payment/create-checkout-session", {products:cart.userProducts
-,couponCode:null})
-      const session=res.data
+      const res = await axiosInstance.post("/payment/create-checkout-session", {
+        products: cart.userProducts
+        , couponCode: null
+      })
+      const session = res.data
       console.log("Checkout session created:", session);
-     
-      
+       window.location.href = session.url;
+
+
     } catch (error) {
       console.error("Error creating checkout session:", error);
     }

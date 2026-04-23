@@ -1,6 +1,7 @@
 import Coupon from "../models/coupon.model.js";
 import Kitchen from "../models/kitchen.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import { stripe } from "../Utils/stripe.js";
 import { findCoupon } from "./coupon.controller.js";
 import "dotenv/config.js";
@@ -72,7 +73,7 @@ export const createCheckoutSession = async (req, res) => {
     }
     res
       .status(200)
-      .json({ sucess: true, id: session.id, totalAmmount: totalAmmount / 100 });
+      .json({ sucess: true, url: session.url, totalAmmount: totalAmmount / 100 });
   } catch (error) {
     console.error("error in createchechout session controller", error);
     return res.status(500).json({
@@ -91,15 +92,22 @@ const createStripeCoupon = async (discountPercentage) => {
   return coupon.id;
 };
 
+
 export const createNewCoupon = async (userId) => {
-  console.log("Creating new coupon for user:", userId);
   try {
+    const existingCoupon = await Coupon.findOne({ userId });
+
+    if (existingCoupon) {
+      return existingCoupon; // Return the existing coupon if it already exists for the user
+    }
+
     const newCoupon = new Coupon({
       code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
       discountPercentage: 10,
       userId: userId,
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //30 days
+      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
+
     await newCoupon.save();
     return newCoupon;
   } catch (error) {
@@ -110,6 +118,7 @@ export const createNewCoupon = async (userId) => {
 export const checkoutSuccess = async (req, res) => {
   try {
     const { sessionId } = req.body;
+    console.log("checkout success controller called with sessionId:", sessionId);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.payment_status === "paid") {
       await Coupon.findOneAndUpdate(
@@ -122,13 +131,19 @@ export const checkoutSuccess = async (req, res) => {
         },
       );
 
+
+      const user=await User.findByIdAndUpdate(session.metadata.userId, {
+        cartItem: [],
+      }); 
+      console.log("user cart cleared after successful payment", user);
+
       const products = JSON.parse(session.metadata.products);
 
       //save new order in db
       const newOrder = new Order({
         user: session.metadata.userId,
         products: products.map((p) => ({
-          products: p.id,
+          product: p.id,
           quantity: p.quantity,
           price: p.price,
         })),
@@ -137,6 +152,7 @@ export const checkoutSuccess = async (req, res) => {
       });
 
       await newOrder.save();
+
       res.status(200).json({
         success: true,
         message: "order placed successfully",
@@ -157,97 +173,4 @@ export const checkoutSuccess = async (req, res) => {
   }
 };
 
-//---order controller to get user orders
-export const getUserOrders = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const kitchen = await Kitchen.findOne({ kitchenOwner: userId }).select(
-      "menuItems",
-    );
-    const orders = await Order.aggregate([
-      {
-        $match: {
-          "products.product": { $in: kitchen.menuItems },
-          isDelivered: false,
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      {
-        $project: {
-          __v: 0,
-        },
-      },
-    ]);
-    res.status(200).json({
-      success: true,
-      message: "user orders fetched successfully",
-      orders: orders,
-    });
-  } catch (error) {
-    console.error("error in get user orders controller", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
 
-export const checkout = async (req, res) => {
-  try {
-    const { products } = req.body;
-
-    const userId = req.user._id;
-
-    const newOrder = new Order({
-      user: userId,
-      products: products.map((p) => ({
-        product: p.id,
-        quantity: p.quantity,
-        price: p.price,
-      })),
-      totalAmount: products.reduce(
-        (total, p) => total + p.price * p.quantity,
-        0,
-      ),
-    });
-    await newOrder.save();
-    res.status(200).json({
-      success: true,
-      message: "order placed successfully",
-      orderId: newOrder._id,
-    });
-  } catch (error) {
-    console.error("error in place order controller", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-export const markOrderAsDelivered = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "order not found" });
-    }
-    order.isDelivered = true;
-    await order.save();
-    return res.status(200).json({
-      success: true,
-      message: "order marked as delivered successfully",
-    });
-  } catch (error) {
-    console.error("error in mark order as delivered controller", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};

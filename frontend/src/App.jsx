@@ -17,6 +17,7 @@ import RegisterKitchen from "./Pages/RegisterKitchen.jsx";
 import KitchenDetailPage from "./Pages/KitchenDetailPage.jsx";
 import KitchenMenu from "./Pages/KitchenMenu.jsx";
 import KitchenReviewsPage from "./Pages/KitchenReviewsPage.jsx";
+import PurchaseSuccessPage from "./Pages/PurchaseSuccessPage.jsx";
 
 
 function App() {
@@ -127,10 +128,21 @@ function App() {
 
           <Route path="/cart" element={
             <ProtectRoute>
+              <Layout>
               <CartPage />
+              </Layout>
+            </ProtectRoute>
+          } />
+
+                    <Route path="/purchase-success" element={
+            <ProtectRoute>
+              <Layout>
+              <PurchaseSuccessPage />
+              </Layout>
             </ProtectRoute>
           } />
           
+
         </Routes>
         <Toaster />
       </div>

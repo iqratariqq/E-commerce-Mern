@@ -1,6 +1,6 @@
 import express from "express"
 import {  isVendor, protectRoute } from "../middelware/auth.middelware.js";
-import {  getUserOrders, markOrderAsDelivered } from "../controller/payment.controller.js";
+import {  getUserOrders, markOrderAsDelivered } from "../controller/order.controller.js";
 
 
 const router=express.Router();
