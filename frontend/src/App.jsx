@@ -18,6 +18,7 @@ import KitchenDetailPage from "./Pages/KitchenDetailPage.jsx";
 import KitchenMenu from "./Pages/KitchenMenu.jsx";
 import KitchenReviewsPage from "./Pages/KitchenReviewsPage.jsx";
 import PurchaseSuccessPage from "./Pages/PurchaseSuccessPage.jsx";
+import PurchaseCancelPage from "./Pages/PurchaseCancelPage.jsx";
 
 
 function App() {
@@ -129,19 +130,28 @@ function App() {
           <Route path="/cart" element={
             <ProtectRoute>
               <Layout>
-              <CartPage />
+                <CartPage />
               </Layout>
             </ProtectRoute>
           } />
 
-                    <Route path="/purchase-success" element={
+          <Route path="/purchase-success" element={
             <ProtectRoute>
               <Layout>
-              <PurchaseSuccessPage />
+                <PurchaseSuccessPage />
               </Layout>
             </ProtectRoute>
           } />
-          
+
+          <Route path="/purchase-cancel" element={
+            <ProtectRoute>
+              <Layout>
+                <PurchaseCancelPage />
+              </Layout>
+            </ProtectRoute>
+          } />
+
+
 
         </Routes>
         <Toaster />

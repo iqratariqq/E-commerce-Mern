@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
+import Confetti from 'react-confetti'
 
 
 
@@ -40,6 +41,13 @@ const PurchaseSuccessPage = () => {
 
   return (
     <div className="min-h-screen  flex items-center justify-center px-4">
+      <Confetti
+        width={window.innerWidth}
+        height={window.innerHeight}
+        numberOfPieces={700}
+        recycle={false}
+        gravity={0.1}
+      />
       <div className="max-w-md w-full bg-offWhite/70 rounded-md shadow-xl overflow-hidden z-10">
 
         <div className="p-6 sm:p-8  ">
