@@ -62,6 +62,7 @@ export const createCheckoutSession = async (req, res) => {
         products: JSON.stringify(
           products.map((p) => ({
             id: p.productDetails._id,
+            kitchen: p.productDetails.kitchen,
             quantity: p.cartItem.quantity,
             price: p.productDetails.price,
           })),
@@ -146,6 +147,7 @@ export const checkoutSuccess = async (req, res) => {
           product: p.id,
           quantity: p.quantity,
           price: p.price,
+          kitchen: p.kitchen,
         })),
         totalAmount: session.amount_total / 100,
         stripSessionId: sessionId,
@@ -153,7 +155,7 @@ export const checkoutSuccess = async (req, res) => {
 
       await newOrder.save();
 
-      res.status(200).json({
+     return  res.status(200).json({
         success: true,
         message: "order placed successfully",
         orderId: newOrder._id,

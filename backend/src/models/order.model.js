@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const orderSchema = new mongoose.Schema(
   {
     user: {
@@ -9,6 +10,11 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
+        kitchen: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Kitchen",
+          required: true,
+        },
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Menu",
@@ -39,7 +45,7 @@ const orderSchema = new mongoose.Schema(
       unique: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Order = mongoose.model("Order", orderSchema);

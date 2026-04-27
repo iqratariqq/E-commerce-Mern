@@ -3,7 +3,7 @@ import { BarChart, PlusCircle, ShoppingBasket } from 'lucide-react';
 import { useState } from 'react';
 import CreateProductForm from '../Components/ProductForm';
 import ProductList from '../Components/ProductList';
-import Analytics from '../Components/Analytics';
+import AnalyticsTab from '../Components/AnalyticsTab';
 
 const tabs = [
   { id: "create", label: "Create Product", icon: PlusCircle },
@@ -37,7 +37,7 @@ const VendorDashboard = () => {
       </div>
       {activeTab === "create" && <CreateProductForm/>}
       {activeTab==="products" && <ProductList/>}
-      {activeTab==="analytics" && <Analytics/>}
+      {activeTab==="analytics" && <AnalyticsTab/>}
 
 
     </div>

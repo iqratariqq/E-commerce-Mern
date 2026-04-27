@@ -2,13 +2,14 @@ import Order from "../models/order.model.js";
 import Menu from "../models/order.model.js";
 import User from "../models/user.model.js";
 import Kitchen from "../models/kitchen.model.js";
+import mongoose from "mongoose";
 
 export const getAnalytics = async () => {
   try {
     const totalUser = await User.countDocuments();
     const totalKitchen=await Kitchen.countDocuments();
-    const totalProducts = await Menu.countDocuments();
-    const salesData = await Order.aggregat([
+    const totalMenus = await Menu.countDocuments();
+    const salesData = await Order.aggregate([
       {
         $group: {
           _id: null,
@@ -24,7 +25,7 @@ export const getAnalytics = async () => {
     };
     return {
       Users: totalUser,
-      Products: totalProducts,
+      Menus: totalMenus,
       Kitchens: totalKitchen,
       sales: totalSales,
       Revenue: totalRevenue,
@@ -37,36 +38,53 @@ export const getAnalytics = async () => {
 
 export const getDailySalesData = async (kitchenId, startDate, endDate) => {
   try {
-    const dalySalesData = await Order.aggregate([
+  
+    const dailySalesData = await Order.aggregate([
       {
         $match: {
-          "products.kitchen": mongoose.Types.ObjectId(kitchenId),
+          "products.kitchen": new mongoose.Types.ObjectId(kitchenId),
           createdAt: {
-            $gte: startDate,
-            $lte: endDate,
+            $gte: new Date(startDate),
+            $lte: new Date(endDate),
           },
         },
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", $date: "$createdAt" } },
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+            },
+          },
           sales: { $sum: 1 },
           revenue: { $sum: "$totalAmount" },
         },
       },
       {
-        $sort: { _id: 1 },
+        $sort: {
+          _id: 1,
+        },
       },
     ]);
+     console.log("daily sales data", dailySalesData);  
+
     const dateArray = getDateInRange(startDate, endDate);
-    return dateArray.map((date) => {
-      const foundData = dalySalesData.find((item) => item._id === date);
+    console.log("date array", dateArray); 
+
+     dateArray.map((date) => {
+      const foundData = dailySalesData.find(
+        (item) => item._id === date
+      );
+      console.log("found data for date",  foundData);
+
       return {
         date,
-        sales: foundData?.sales,
-        revenue: foundData?.revenue,
+        sales: foundData?.sales || 0,
+        revenue: foundData?.revenue || 0,
       };
     });
+
   } catch (error) {
     throw error;
   }
@@ -74,11 +92,16 @@ export const getDailySalesData = async (kitchenId, startDate, endDate) => {
 
 const getDateInRange = (startDate, endDate) => {
   const dates = [];
+  console.log("start date", startDate);
+  console.log("end date", endDate);
   let currentDate = new Date(startDate);
-  while (startDate <= endDate) {
+  while (currentDate <= endDate) {
     dates.push(currentDate.toISOString().split("1")[0]);
     currentDate.setDate(currentDate.getDate() + 1);
+    console.log("current date", currentDate);
   }
+  console.log("dates in range", dates);
+  return dates;
 };
 
 export const getKitchenSalesData = async (req,res) => {
@@ -87,7 +110,7 @@ export const getKitchenSalesData = async (req,res) => {
     const kitchenSalesData = await Order.aggregate([
       {
         $match: {
-          "products.kitchen": mongoose.Types.ObjectId(kitchenId),
+          "products.kitchen": new mongoose.Types.ObjectId(kitchenId),
         },
       },
       {
