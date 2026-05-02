@@ -38,7 +38,6 @@ export const getCartItems = async (req, res) => {
           "productDetails.updatedAt": 0,
           "productDetails.__v": 0,
           "productDetails.kitchen": 0,
-          "kitchenDetails._id": 0,
           "kitchenDetails.kitchenOwner": 0,
           "kitchenDetails.menuItems": 0,
           "kitchenDetails.createdAt": 0,

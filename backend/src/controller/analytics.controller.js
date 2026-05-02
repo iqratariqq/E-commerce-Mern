@@ -41,13 +41,17 @@ export const getDailySalesData = async (kitchenId, startDate, endDate) => {
   
     const dailySalesData = await Order.aggregate([
       {
-        $match: {
-          "products.kitchen": new mongoose.Types.ObjectId(kitchenId),
-          createdAt: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate),
-          },
-        },
+$match: {
+  products: {
+    $elemMatch: {
+      kitchen: new mongoose.Types.ObjectId(kitchenId),
+    },
+  },
+  createdAt: {
+    $gte: new Date(startDate),
+    $lte: new Date(endDate),
+  },
+}
       },
       {
         $group: {
@@ -72,7 +76,7 @@ export const getDailySalesData = async (kitchenId, startDate, endDate) => {
     const dateArray = getDateInRange(startDate, endDate);
     console.log("date array", dateArray); 
 
-     dateArray.map((date) => {
+     const result= dateArray.map((date) => {
       const foundData = dailySalesData.find(
         (item) => item._id === date
       );
@@ -84,6 +88,8 @@ export const getDailySalesData = async (kitchenId, startDate, endDate) => {
         revenue: foundData?.revenue || 0,
       };
     });
+    console.log("final daily sales data", result);
+    return result;
 
   } catch (error) {
     throw error;
@@ -92,15 +98,14 @@ export const getDailySalesData = async (kitchenId, startDate, endDate) => {
 
 const getDateInRange = (startDate, endDate) => {
   const dates = [];
-  console.log("start date", startDate);
-  console.log("end date", endDate);
   let currentDate = new Date(startDate);
+  endDate = new Date(endDate);
+
   while (currentDate <= endDate) {
-    dates.push(currentDate.toISOString().split("1")[0]);
+    dates.push(new Date(currentDate).toISOString().split("T")[0]);
     currentDate.setDate(currentDate.getDate() + 1);
-    console.log("current date", currentDate);
   }
-  console.log("dates in range", dates);
+
   return dates;
 };
 
@@ -110,7 +115,7 @@ export const getKitchenSalesData = async (req,res) => {
     const kitchenSalesData = await Order.aggregate([
       {
         $match: {
-          "products.kitchen": new mongoose.Types.ObjectId(kitchenId),
+          "$products.kitchen": new mongoose.Types.ObjectId(kitchenId),
         },
       },
       {

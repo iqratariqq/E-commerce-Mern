@@ -20,7 +20,7 @@ const KitchenReviewsPage = ({ kitchenId }) => {
 
       {isLoading ? (
         <p className="text-center text-gray-500">Loading reviews...</p>
-      ) : reviewsData.length === 0 ? (
+      ) : reviewsData?.length === 0 ? (
         <p className="text-center text-gray-500">No reviews yet.</p>
       ) : (
         <div className="space-y-4">
