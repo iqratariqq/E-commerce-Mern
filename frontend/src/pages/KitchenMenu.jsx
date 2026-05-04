@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { getMenuByKitchenId } from "../api/productApi";
 import { fillOffset, m, motion } from "framer-motion"
-import { Utensils } from "lucide-react";
+import { Loader, Utensils } from "lucide-react";
 import { useState } from "react"
 import MenuCard from "../Components/MenuCard";
+import EmptyComponent from "../Components/EmptyComponent";
 
 
 const KitchenMenu = () => {
@@ -12,7 +13,7 @@ const KitchenMenu = () => {
   const filters = ["All", "Lunch", "Dinner", "Snacks"]
   const [activeFilter, setActiveFilter] = useState("All")
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     {
       queryKey: ["getMenuByKitchenId"],
       queryFn: () => getMenuByKitchenId(id)
@@ -25,7 +26,7 @@ const KitchenMenu = () => {
 
 
   return (
-    <div className="  bg-gradient-to-b from-taupeDark to-taupeDeep pb-5">
+    <div className="  bg-gradient-to-b from-taupeDark to-taupeDeep  py-20">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -37,7 +38,9 @@ const KitchenMenu = () => {
         <h1 className="text-pumpkin capitalize text-sm md:text-lg"> what we serve </h1>
         <span className="bg-pumpkin h-[1px] w-9" />
       </motion.div>
-      <motion.div
+      {isLoading ?(<Loader size={20} rotate={360}/>) : isError ? (<p className="text-center text-red-500">Error loading menu</p>) : data?.Menus?.length === 0 ? (<EmptyComponent icon={Utensils} text="No menu items available" color="text-pumpkinDark" />) : 
+      <>
+            <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
@@ -69,6 +72,14 @@ const KitchenMenu = () => {
         }
 
       </div>
+      
+      
+      </>
+      
+      
+      
+      }
+
 
     </div>
 

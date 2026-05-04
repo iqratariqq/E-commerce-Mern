@@ -107,7 +107,10 @@ function App() {
 
           <Route path="kitchen-detail/:id" element={
             <ProtectRoute>
-              <KitchenDetailPage />
+              <Layout>
+ <KitchenDetailPage />
+              </Layout>
+             
             </ProtectRoute>
 
           } />

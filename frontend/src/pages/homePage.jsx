@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getAllKitchens } from "../api/kitchenApi";
 import KitchenCard from "../Components/KitchenCard";
+import Loader from "../Components/Loader";
 
 
 
@@ -20,9 +21,18 @@ console.log("kitchens in home page", data)
 
       <h1 className="text-center font-bold  text-3xl  bg-gradient-to-r from-toupe  to-yellow-700 bg-clip-text text-transparent">Check our latest Catogries</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 sm:grid-cols-2 mx-2 gap-4">
-        {data?.kitchens?.map((kitchen) => (
-          <KitchenCard key={kitchen._id} kitchen={kitchen} />
-        ))}
+        {
+          isLoading ? (
+            <Loader/>
+          ) : isError ? (
+            <p className="text-center text-red-500">Error loading kitchens</p>
+          ) : (
+            data?.kitchens?.map((kitchen) => (
+              <KitchenCard key={kitchen._id} kitchen={kitchen} />
+            ))
+          )
+
+        }
       </div>
 
     </div>

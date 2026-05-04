@@ -16,8 +16,7 @@ console.log("kitchenData in KitchenDetailPage", kitchenData)
   return (
     <>
 
-<KitchenNavBar kitchenData={kitchenData}/>
-<KitchenOverviewPage/>
+{/* <KitchenNavBar kitchenData={kitchenData}/> */}
 <KitchenMenu kitchenId={id} />
 <KitchenReviewsPage kitchenId={id} />
       

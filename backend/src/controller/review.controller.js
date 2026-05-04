@@ -9,11 +9,7 @@ export const getReviews = async (req, res) => {
       "userId",
       "userName"
     );
-    if (reviews.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "no reviews found" });
-    }
+ 
 
     return res.status(200).json({ success: true, reviews });
   } catch (error) {

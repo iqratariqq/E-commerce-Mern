@@ -3,16 +3,13 @@ import { useCart } from "../hooks/useCart"
 import { motion } from "framer-motion"
 import CartItem from "../Components/CartItem"
 import OrderSummary from "../Components/OrderSummary"
+import { Loader, ShoppingBagIcon, ShoppingCart } from "lucide-react"
+import EmptyComponent from "../Components/EmptyComponent"
 
 
 const CartPage = () => {
-  const { cart } = useCart()
-  // const{data:cart,isLoading,isError}=useQuery(
-  //   {
-  //     queryKey:["getcart"],
-  //     queryFn:getCartItems,
-  //   }
-  // )
+  const { cart,isLoading } = useCart()
+
   console.log("cart items in CartPage", cart?.userProducts)
   console.log("quentity", cart)
 
@@ -26,16 +23,26 @@ const CartPage = () => {
             transition={{ duration: 0.5, ease: "easeInOut" }}
             className=" w-full lg:max-w-2xl xl:max-w-4xl flex-none "
           >
-            {cart?.userProducts.length === 0 ? (
+            {isLoading ? (
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-800">Your cart is empty</h2>
+                <Loader size={30} className="animate-spin text-pumpkin/20 mx-auto mb-4" />
+                <p className="text-lg font-medium text-taupeDark">Loading cart items...</p>
               </div>
             ) : (
+              
+
+                cart?.userProducts?.length === 0 ? (
+                  <div className=" flex items-center justify-center min-h-[60vh]">
+                  <EmptyComponent icon={ShoppingCart} text="Your cart is empty" color="text-taupeDark" />
+                  </div>
+
+                )
+                :(
               <div>
                 {cart?.userProducts?.map((item) => (
                   <CartItem key={item._id} item={item} />
                 ))}
-              </div>
+              </div>)
             )}
           </motion.div>
           {cart?.userProducts.length > 0 &&

@@ -9,8 +9,6 @@ const MenuCard = ({ menu }) => {
     
 
     const handleAddtoCart = (menuId) => {
-    console.log("add to cart", menuId)
-    console.log("addtoCartMutation in MenuCard")
     addtoCartMutation(menuId)
 
   }
