@@ -19,18 +19,22 @@ import KitchenMenu from "./Pages/KitchenMenu.jsx";
 import KitchenReviewsPage from "./Pages/KitchenReviewsPage.jsx";
 import PurchaseSuccessPage from "./Pages/PurchaseSuccessPage.jsx";
 import PurchaseCancelPage from "./Pages/PurchaseCancelPage.jsx";
+import VendorPendingApproval from "./Pages/PendingRequest.jsx";
+import { useRegisteredKitchen } from "./hooks/useRegisteredKitchen.js";
 
 
 function App() {
 
   const { isLoading, authUser } = useAuthuser()
+
   const isAuthenticated = !!authUser
+  const { data: registeredKitchenData, isLoading: isKitchenRegisteredLoading } = useRegisteredKitchen()
+
 
 
   console.log("authUser in App.jsx:", authUser)
   if (isLoading) return <Loader />
-  console.log("authUser?.user?.role", authUser?.user?.role)
-  console.log("authuser?.requestStatue", authUser?.user?.requestStatus)
+
 
 
   function RedirectAuthenticatedUser({ children }) {
@@ -39,19 +43,42 @@ function App() {
       console.log("redirecting authenticated customer to home page")
       return <Navigate to="/" replace />
     }
-
-    if (isAuthenticated && authUser?.user?.role === "vendor" && authUser?.user?.requestStatus === "pending") {
+    if (isAuthenticated && authUser?.user?.role === "vendor") {
       return <Navigate to="/vendor/register-kitchen" replace />
     }
-    if (isAuthenticated && authUser?.user?.role === "vendor" && authUser?.user?.requestStatus === "active") {
 
+
+
+    return children
+  }
+
+  function RedirectVendor({ children }) {
+
+    if (authUser?.user?.requestStatus === "pending") {
+      return <Navigate to="/vendor/pending-approval" replace />
+    }
+    if (authUser?.user?.requestStatus === "active" && registeredKitchenData?.isRegistered) {
       return <Navigate to="/vendor/vendor-dashboard" replace />
     }
     return children
   }
 
-  function ProtectRoute({ children }) {
+function RedirectAuthenticatedVendor({ children }) {
+
+    if (authUser?.user?.requestStatus === "pending") {
+      return <Navigate to="/vendor/pending-approval" replace />
+    }
+    if ( authUser?.user?.requestStatus === "active" && !registeredKitchenData?.isRegistered) {
+      return <Navigate to="/vendor/register-kitchen" replace />
+    }
+    return children
+  }
+
+  function ProtectRoute({ children, role }) {
     if (!isAuthenticated) {
+      return <Navigate to="/" replace />
+    }
+    if (role && authUser?.user?.role !== role) {
       return <Navigate to="/" replace />
     }
 
@@ -93,24 +120,36 @@ function App() {
           } />
 
           <Route path="/vendor/vendor-dashboard" element={
-            <ProtectRoute>
-              <VendorDashboard />
+            <ProtectRoute role="vendor">
+              <RedirectAuthenticatedVendor>
+ <VendorDashboard />
+              </RedirectAuthenticatedVendor>
+             
             </ProtectRoute>
           }
           />
 
-          <Route path="vendor/register-kitchen" element={
-            <RedirectAuthenticatedUser>
-              <RegisterKitchen />
-            </RedirectAuthenticatedUser>
+          <Route path="/vendor/pending-approval" element={
+            <ProtectRoute role="vendor">
+              <VendorPendingApproval />
+            </ProtectRoute>
+          }
+          />
+
+          <Route path="/vendor/register-kitchen" element={
+            <ProtectRoute role="vendor">
+              <RedirectVendor>
+                <RegisterKitchen />
+              </RedirectVendor>
+            </ProtectRoute>
           } />
 
           <Route path="kitchen-detail/:id" element={
             <ProtectRoute>
               <Layout>
- <KitchenDetailPage />
+                <KitchenDetailPage />
               </Layout>
-             
+
             </ProtectRoute>
 
           } />
@@ -131,7 +170,7 @@ function App() {
           />
 
           <Route path="/cart" element={
-            <ProtectRoute>
+            <ProtectRoute role="customer">
               <Layout>
                 <CartPage />
               </Layout>
@@ -139,7 +178,7 @@ function App() {
           } />
 
           <Route path="/purchase-success" element={
-            <ProtectRoute>
+            <ProtectRoute role="customer">
               <Layout>
                 <PurchaseSuccessPage />
               </Layout>
@@ -147,7 +186,7 @@ function App() {
           } />
 
           <Route path="/purchase-cancel" element={
-            <ProtectRoute>
+            <ProtectRoute role="customer">
               <Layout>
                 <PurchaseCancelPage />
               </Layout>

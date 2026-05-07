@@ -5,22 +5,26 @@ import Input from '../Components/Input'
 import { useMutation } from '@tanstack/react-query'
 import { registerKitchen } from '../api/kitchenApi'
 import toast from 'react-hot-toast'
-import { Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const RegisterKitchen = () => {
+  const navigate = useNavigate();
   const { mutate: registerKitchenMutation, isPending } = useMutation({
     mutationFn: registerKitchen,
     mutationKey: ["registerKitchen"],
     onSuccess: () => {
-      toast.success("register Kitchen successfully")
-      return <Navigate to="/vendor/dashboard" replace />
+      toast.success("Kitchen registered successfully!")
+     navigate("/vendor/vendor-dashboard")
       
 
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || err.message)
-    }
+    },
+
   })
+
+  console.log("registerKitchenMutation", registerKitchenMutation)
 
   const categories = [
     "Desi",

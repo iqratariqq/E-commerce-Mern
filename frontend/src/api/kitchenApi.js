@@ -17,3 +17,8 @@ export const getKitchenById=async(kitchenId)=>{
     console.log("kitchen data fetched by id in api", res.data);
     return res.data;
 }
+
+export const getisKitchenRegistered=async()=>{
+    const res=await axiosInstance.get('/user/');
+    return res.data;
+}

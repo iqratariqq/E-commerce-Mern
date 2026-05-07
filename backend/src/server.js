@@ -11,6 +11,7 @@ import reviewRoutes from "./routes/review.routes.js";
 import adminRoutes from "./routes/admin.routes.js"
 import kitchenRoutes from "./routes/kitchen.routes.js"
 import orderRoutes from "./routes/order.route.js"
+import userRoutes from "./routes/user.routes.js"
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
@@ -41,6 +42,7 @@ app.use("/api/payment",payementRoutes)
 app.use("/api/kitchen",kitchenRoutes)
 app.use("/api/reviews",reviewRoutes)
 app.use("/api/orders",orderRoutes)
+app.use("/api/user",userRoutes)
 
 connectDB().then(() => {
   app.listen(port, () => {

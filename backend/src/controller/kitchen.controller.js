@@ -345,7 +345,7 @@ export const getKitchenById = async (req, res) => {
     console.log("error in get kitchen by id", error.message);
     return res.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message: "network error",
       error: error.message,
     });
   }
@@ -364,6 +364,24 @@ export const getVendorKitchenId=async(kitechenOwner)=>{
   } catch (error) {
      console.log("error in get vendor kitchen id", error.message);
     throw new Error(error.message);
+  }
+
+}
+
+export const isKitchenRegistered=async(req,res)=>{
+  try {
+    const vendorId=req.user._id
+    const kitchen=await Kitchen.findOne({kitchenOwner:vendorId})
+    if(kitchen){
+      return res.status(200).json({success:true,isRegistered:true})
+    }else{
+      return res.status(200).json({success:true,isRegistered:false})
+    }
+    
+  } catch (error) {
+      console.log("error in check kitchen registration", error.message);
+      return res.status(500).json({success:false,message:"network error",error:error.message})
+    
   }
 
 }
