@@ -63,12 +63,12 @@ function App() {
     return children
   }
 
-function RedirectAuthenticatedVendor({ children }) {
+  function RedirectAuthenticatedVendor({ children }) {
 
     if (authUser?.user?.requestStatus === "pending") {
       return <Navigate to="/vendor/pending-approval" replace />
     }
-    if ( authUser?.user?.requestStatus === "active" && !registeredKitchenData?.isRegistered) {
+    if (authUser?.user?.requestStatus === "active" && !registeredKitchenData?.isRegistered) {
       return <Navigate to="/vendor/register-kitchen" replace />
     }
     return children
@@ -122,9 +122,9 @@ function RedirectAuthenticatedVendor({ children }) {
           <Route path="/vendor/vendor-dashboard" element={
             <ProtectRoute role="vendor">
               <RedirectAuthenticatedVendor>
- <VendorDashboard />
+                <VendorDashboard />
               </RedirectAuthenticatedVendor>
-             
+
             </ProtectRoute>
           }
           />
